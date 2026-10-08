@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Console Deployment Guide & Evidence Collector — APEX PREDICT (Group 2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* ==========================================================================
+   THEME: White / Navy / Orange (ขาว / น้ำเงิน / ส้ม)
+   ========================================================================== */
+:root {
+  --navy: #0B2A5B;
+  --navy-dark: #071C3D;
+  --navy-light: #164691;
+  --blue: #1F6FEB;
+  --blue-hover: #1358C2;
+  --blue-50: #EAF2FF;
+  --blue-100: #D6E6FF;
+  --orange: #F28C28;
+  --orange-dark: #C26308;
+  --orange-50: #FFF5EA;
+  --orange-100: #FFE3C4;
+  --ink: #1E293B;
+  --muted: #64748B;
+  --line: #E2E8F0;
+  --bg: #F4F7FB;
+  --card: #FFFFFF;
+  --ok: #16A34A;
+  --ok-50: #EAF7EE;
+  --bad: #DC2626;
+  --bad-50: #FDECEC;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--ink);
+  background-color: var(--bg);
+  font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+code, .mono {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.9em;
+}
+code {
+  background: var(--blue-50);
+  color: var(--navy);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--blue-100);
+}
+
+/* TOP APP BAR */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
+  color: #FFFFFF;
+  padding: 10px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid var(--orange);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.brand-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #FFFFFF;
+}
+.brand-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.brand-sub {
+  font-size: 11px;
+  color: #CFE2FF;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.btn-primary { background: var(--blue); color: #FFF; }
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-orange { background: var(--orange); color: #FFF; }
+.btn-orange:hover { background: var(--orange-dark); }
+.btn-outline-light { background: rgba(255,255,255,0.1); color: #FFF; border: 1px solid rgba(255,255,255,0.25); }
+.btn-outline-light:hover { background: rgba(255,255,255,0.2); }
+.btn-outline-navy { background: #FFF; color: var(--navy); border: 1px solid var(--navy); }
+.btn-outline-navy:hover { background: var(--blue-50); }
+
+/* MAIN LAYOUT */
+.main-wrapper {
+  display: flex;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* SIDEBAR NAVIGATION */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 75px;
+  height: calc(100vh - 95px);
+  overflow-y: auto;
+  background: #FFFFFF;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.sidebar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-menu li {
+  margin-bottom: 4px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.sidebar-link:hover, .sidebar-link.active {
+  background: var(--blue-50);
+  color: var(--blue);
+  font-weight: 600;
+}
+.phase-badge {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #E2E8F0;
+  color: var(--muted);
+}
+.sidebar-link.active .phase-badge {
+  background: var(--blue);
+  color: #FFF;
+}
+
+/* CONTENT AREA */
+.content-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* GROUP 2 INFO FORM CARD */
+.card {
+  background: #FFFFFF;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.card-header-styled {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.card-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.group-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.form-control {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  transition: border-color 0.2s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--orange);
+  background: var(--orange-50);
+}
+
+/* Member Table inside Card */
+.member-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.member-table th {
+  background: var(--navy);
+  color: #FFF;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+}
+.member-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.member-table input {
+  width: 100%;
+  border: 1px solid transparent;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+}
+.member-table input:focus {
+  outline: none;
+  border-color: var(--orange);
+  background: var(--orange-50);
+}
+
+/* PHASE DEPLOYMENT CARDS */
+.phase-card {
+  background: #FFFFFF;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.phase-header {
+  background: linear-gradient(90deg, #F8FAFD 0%, #FFFFFF 100%);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.phase-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.phase-tag {
+  background: var(--orange);
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.phase-body {
+  padding: 20px;
+}
+
+/* STEP ITEM */
+.step-item {
+  border-left: 3px solid var(--blue);
+  background: #FCFDFF;
+  border-radius: 0 6px 6px 0;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.step-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-inst {
+  margin: 0 0 8px 0;
+  color: #334155;
+}
+.step-inst ol {
+  margin: 4px 0 0 0;
+  padding-left: 20px;
+}
+
+/* Callouts */
+.callout-blue {
+  background: var(--blue-50);
+  border-left: 3px solid var(--blue);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #1E3A8A;
+  margin-top: 8px;
+}
+.callout-orange {
+  background: var(--orange-50);
+  border-left: 3px solid var(--orange);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--orange-dark);
+  margin-top: 8px;
+}
+
+/* EVIDENCE UPLOAD BOX (Core Requirement) */
+.evidence-box {
+  background: #FFFBF6;
+  border: 1.5px dashed var(--orange);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 14px;
+}
+.evidence-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.evidence-id {
+  font-weight: 700;
+  color: var(--orange-dark);
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.evidence-checklist {
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 10px;
+}
+.evidence-dropzone {
+  background: #FFFFFF;
+  border: 1px dashed #CBD5E1;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.evidence-dropzone:hover, .evidence-dropzone.dragover {
+  border-color: var(--orange);
+  background: var(--orange-50);
+}
+.evidence-dropzone i {
+  font-size: 24px;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+
+.evidence-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.preview-card {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #FFF;
+}
+.preview-card img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+.preview-caption-input {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--line);
+  padding: 4px 6px;
+  font-size: 11px;
+  font-family: inherit;
+}
+.preview-delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(220, 38, 38, 0.85);
+  color: #FFF;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+/* PRINT REPORT CONTAINER (Hidden by default, used when printing PDF report) */
+#print-report-container {
+  display: none;
+}
+
+@media print {
+  body {
+    background: #FFFFFF;
+    color: #000;
+  }
+  .top-nav, .sidebar, .floating-bar, .no-print, .evidence-dropzone, .btn {
+    display: none !important;
+  }
+  .main-wrapper {
+    display: block;
+    padding: 0;
+    max-width: 100%;
+  }
+  .content-area {
+    width: 100%;
+  }
+  .card, .phase-card {
+    border: 1px solid #CBD5E1;
+    box-shadow: none;
+    margin-bottom: 20px;
+    break-inside: avoid;
+  }
+  .preview-card img {
+    height: auto;
+    max-height: 350px;
+    object-fit: contain;
+  }
+  .preview-delete-btn { display: none !important; }
+}
+
+/* Lightbox Modal */
+.lightbox-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.85);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lightbox-modal.active { display: flex; }
+.lightbox-img {
+  max-width: 95vw;
+  max-height: 90vh;
+  border-radius: 6px;
+  box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  color: #FFF;
+  font-size: 30px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAVIGATION BAR -->
+<header class="top-nav">
+  <div class="brand-box">
+    <div class="brand-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+    <div>
+      <div class="brand-title">APEX PREDICT — AWS Console Deployment Guide</div>
+      <div class="brand-sub">คู่มือการติดตั้งระบบและรวบรวมหลักฐานภาพหน้าจอ (Term Project Group 2)</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <a href="index.html" class="btn btn-outline-light"><i class="fa-solid fa-gamepad"></i> หน้าเว็บทายผลกีฬา</a>
+    <a href="../report/cloud-security-report-gemini.html" class="btn btn-outline-light"><i class="fa-solid fa-file-lines"></i> ดูรายงานสถาปัตยกรรม</a>
+    <button onclick="exportToJSON()" class="btn btn-outline-light"><i class="fa-solid fa-download"></i> สำรอง JSON</button>
+    <button onclick="downloadAllImagesZip()" class="btn btn-orange"><i class="fa-solid fa-file-zipper"></i> ดาวน์โหลดรูป (ZIP)</button>
+    <button onclick="window.print()" class="btn btn-primary"><i class="fa-solid fa-print"></i> พิมพ์ / Export PDF</button>
+  </div>
+</header>
+
+<div class="main-wrapper">
+  <!-- SIDEBAR NAVIGATION -->
+  <aside class="sidebar">
+    <div class="sidebar-title">
+      <span>ขั้นตอนการติดตั้ง</span>
+      <span class="phase-badge" id="evidence-counter">0 / 22 รูป</span>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#group-info-card" class="sidebar-link active"><span>0. ข้อมูลกลุ่ม Group 2</span></a></li>
+      <li><a href="#phase-0" class="sidebar-link"><span>Phase 0: เตรียมบัญชี AWS</span><span class="phase-badge">S01</span></a></li>
+      <li><a href="#phase-1" class="sidebar-link"><span>Phase 1: VPC, Subnet, Routes</span><span class="phase-badge">S02-S06</span></a></li>
+      <li><a href="#phase-2" class="sidebar-link"><span>Phase 2: Security Groups Matrix</span><span class="phase-badge">S07</span></a></li>
+      <li><a href="#phase-3" class="sidebar-link"><span>Phase 3: IAM &amp; Secrets Manager</span><span class="phase-badge">S08-S09</span></a></li>
+      <li><a href="#phase-4" class="sidebar-link"><span>Phase 4: RDS PostgreSQL Multi-AZ</span><span class="phase-badge">S10</span></a></li>
+      <li><a href="#phase-5" class="sidebar-link"><span>Phase 5: App Tier &amp; Internal ALB</span><span class="phase-badge">S11-S12</span></a></li>
+      <li><a href="#phase-6" class="sidebar-link"><span>Phase 6: Web Tier (Nginx ASG)</span><span class="phase-badge">S13</span></a></li>
+      <li><a href="#phase-7" class="sidebar-link"><span>Phase 7: ACM, ALB, WAF, DNS</span><span class="phase-badge">S14-S17</span></a></li>
+      <li><a href="#phase-8" class="sidebar-link"><span>Phase 8: Monitoring &amp; Logging</span><span class="phase-badge">S18-S19</span></a></li>
+      <li><a href="#phase-9" class="sidebar-link"><span>Phase 9: Verification &amp; Backup</span><span class="phase-badge">S20-S22</span></a></li>
+      <li><a href="#phase-10" class="sidebar-link"><span>Phase 10: Resource Cleanup</span><span class="phase-badge">Cost</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENT WORKSPACE -->
+  <main class="content-area">
+
+    <!-- CARD: GROUP 2 INFORMATION FORM -->
+    <section class="card" id="group-info-card">
+      <div class="card-header-styled">
+        <h2 class="card-title"><i class="fa-solid fa-users-gear" style="color:var(--orange)"></i> ข้อมูลกลุ่มโครงงาน (Term Project Group 2)</h2>
+        <span style="font-size:12px; color:var(--muted);"><i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลอัตโนมัติในเบราว์เซอร์</span>
+      </div>
+
+      <div class="group-form-grid">
+        <div class="form-group">
+          <label>ชื่อโครงงาน (Project Title)</label>
+          <input type="text" class="form-control" id="form-project" value="ระบบทายผลกีฬา (Cloud Sports Prediction &amp; Betting Platform) — Secure 3-Tier Web Application on AWS">
+        </div>
+        <div class="form-group">
+          <label>กลุ่ม (Group)</label>
+          <input type="text" class="form-control" id="form-group-name" value="Group 2">
+        </div>
+        <div class="form-group">
+          <label>ภูมิภาคที่ติดตั้ง (AWS Region)</label>
+          <input type="text" class="form-control" id="form-region" value="Asia Pacific (Singapore) ap-southeast-1">
+        </div>
+      </div>
+
+      <!-- Exactly 5 Members: No, Name, Student ID -->
+      <table class="member-table">
+        <thead>
+          <tr>
+            <th style="width:10%; text-align:center;">ลำดับ</th>
+            <th style="width:55%;">ชื่อ - นามสกุล</th>
+            <th style="width:35%;">รหัสนักศึกษา</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align:center; font-weight:700;">1</td>
+            <td><input type="text" id="m1_name" placeholder="ชื่อ-นามสกุล สมาชิกคนที่ 1"></td>
+            <td><input type="text" id="m1_id" placeholder="รหัสนักศึกษา"></td>
+          </tr>
+          <tr>
+            <td style="text-align:center; font-weight:700;">2</td>
+            <td><input type="text" id="m2_name" placeholder="ชื่อ-นามสกุล สมาชิกคนที่ 2"></td>
+            <td><input type="text" id="m2_id" placeholder="รหัสนักศึกษา"></td>
+          </tr>
+          <tr>
+            <td style="text-align:center; font-weight:700;">3</td>
+            <td><input type="text" id="m3_name" placeholder="ชื่อ-นามสกุล สมาชิกคนที่ 3"></td>
+            <td><input type="text" id="m3_id" placeholder="รหัสนักศึกษา"></td>
+          </tr>
+          <tr>
+            <td style="text-align:center; font-weight:700;">4</td>
+            <td><input type="text" id="m4_name" placeholder="ชื่อ-นามสกุล สมาชิกคนที่ 4"></td>
+            <td><input type="text" id="m4_id" placeholder="รหัสนักศึกษา"></td>
+          </tr>
+          <tr>
+            <td style="text-align:center; font-weight:700;">5</td>
+            <td><input type="text" id="m5_name" placeholder="ชื่อ-นามสกุล สมาชิกคนที่ 5"></td>
+            <td><input type="text" id="m5_id" placeholder="รหัสนักศึกษา"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CONTAINER FOR DEPLOYMENT PHASES (Generated dynamically via JS or rendered clean) -->
+    <div id="phases-container"></div>
+
+  </main>
+</div>
+
+<!-- LIGHTBOX MODAL -->
+<div class="lightbox-modal" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">&times;</span>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="Zoomed screenshot">
+</div>
+
+<script>
+/* ==========================================================================
+   DEPLOYMENT GUIDE DATA DEFINITION (Phases 0 to 10 with S01–S22)
+   ========================================================================== */
+const PHASES = [
+  {
+    id: 'phase-0',
+    number: 'Phase 0',
+    title: 'การเตรียมความพร้อมบัญชี AWS และมาตรการป้องกันงบประมาณ',
+    steps: [
+      {
+        title: '0.1 เปิดใช้งาน Multi-Factor Authentication (MFA) บน Root Account',
+        inst: 'ไปที่ IAM -> Security credentials -> Assign MFA device เพื่อป้องกันการเข้าถึงบัญชีระดับ Root',
+        security: 'CIS AWS Benchmark 1.1: ห้ามใช้งาน Root Account โดยไม่มี MFA เด็ดขาด'
+      },
+      {
+        title: '0.2 สร้าง AWS Budgets Alert แจ้งเตือนค่าใช้จ่าย',
+        inst: 'ไปที่ AWS Budgets -> Create budget -> เลือก Zero spend / Monthly cost budget กำหนดงบ 20 USD ผูกแจ้งเตือนอีเมล'
+      }
+    ],
+    evidences: [
+      {
+        id: 'S01',
+        title: 'ภาพหน้าจอ Root Account MFA & AWS Budget Alert',
+        checklist: 'สถานะ Virtual MFA "Enabled" และหน้ารายละเอียด AWS Budget Alert พร้อมอีเมลแจ้งเตือน'
+      }
+    ]
+  },
+  {
+    id: 'phase-1',
+    number: 'Phase 1',
+    title: 'การสร้าง Virtual Private Cloud (VPC), Subnets 6 ตัว, Gateways และ Routing Tables',
+    steps: [
+      {
+        title: '1.1 สร้าง Custom VPC (apex-predict-vpc)',
+        inst: 'ค้นหาบริการ VPC -> Create VPC -> เลือก VPC only -> Name: apex-predict-vpc, IPv4 CIDR block: 10.0.0.0/16',
+        security: 'Network Isolation: กำหนด Private IP Space แยกเฉพาะขององค์กร'
+      },
+      {
+        title: '1.2 สร้าง Subnets 6 ตัว กระจายข้าม 2 Availability Zones (1a, 1b)',
+        inst: 'สร้าง 2 Public (10.0.1.0/24, 10.0.2.0/24), 2 Private App (10.0.10.0/24, 10.0.11.0/24), และ 2 Isolated DB (10.0.20.0/24, 10.0.21.0/24)'
+      },
+      {
+        title: '1.3 สร้าง Internet Gateway (apex-igw) และ Attach กับ VPC',
+        inst: 'Internet Gateways -> Create internet gateway -> Name: apex-igw -> Actions -> Attach to VPC'
+      },
+      {
+        title: '1.4 สร้าง NAT Gateway (apex-nat-gateway) ใน Public Subnet 1a',
+        inst: 'NAT Gateways -> Create NAT gateway -> Subnet: public-subnet-1a -> Connectivity: Public -> Allocate Elastic IP'
+      },
+      {
+        title: '1.5 สร้างตาราง Route Tables 3 ชุด (rtb-public, rtb-private-app, rtb-isolated-db)',
+        inst: 'rtb-public ชี้ 0.0.0.0/0 ไปที่ IGW, rtb-private-app ชี้ 0.0.0.0/0 ไปที่ NAT GW, rtb-isolated-db มีเฉพาะ local เท่านั้น (ห้ามเพิ่ม 0.0.0.0/0 เด็ดขาด)'
+      },
+      {
+        title: '1.6 เปิดใช้งาน VPC Flow Logs บันทึก Network Metadata',
+        inst: 'เลือก apex-predict-vpc -> แท็บ Flow logs -> Create flow log -> ส่งเข้า CloudWatch Logs / S3'
+      }
+    ],
+    evidences: [
+      { id: 'S02', title: 'VPC apex-predict-vpc', checklist: 'หน้า VPC แสดง Name tag: apex-predict-vpc และ CIDR 10.0.0.0/16' },
+      { id: 'S03', title: 'Subnets ทั้ง 6 ตัว', checklist: 'แสดงรายชื่อ Subnets 6 ตัว ครบ 3 ระดับ และแสดง CIDR Block ชัดเจน' },
+      { id: 'S04', title: 'Internet Gateway & NAT Gateway', checklist: 'IGW แสดงสถานะ Attached และ NAT GW แสดงสถานะ Available พร้อม Elastic IP' },
+      { id: 'S05', title: 'ตาราง Route Tables ทั้ง 3 ชุด', checklist: 'Routes และ Subnet Associations ของ rtb-public, rtb-private-app และ rtb-isolated-db (ไม่มี 0.0.0.0/0)' },
+      { id: 'S06', title: 'VPC Flow Logs Configuration', checklist: 'หน้า Flow Logs แสดงสถานะ Active ชี้เข้าสู่ CloudWatch Logs' }
+    ]
+  },
+  {
+    id: 'phase-2',
+    number: 'Phase 2',
+    title: 'การตั้งค่า Chained Security Groups Matrix (Zero Trust & No Port 22)',
+    steps: [
+      {
+        title: '2.1 สร้าง Security Groups 5 ตัว แบบ Chained IDs',
+        inst: 'สร้าง sg-alb, sg-web, sg-int-alb, sg-app, sg-db โดยอ้างอิง Inbound กฎเฉพาะ SG ID ของชั้นก่อนหน้า',
+        security: 'Least Privilege Microsegmentation: ไม่อนุญาตไอพีตรงข้ามชั้น และปิด Port 22 SSH ทุกกรณี'
+      }
+    ],
+    evidences: [
+      { id: 'S07', title: 'Chained Security Groups Inbound Rules', checklist: 'ตาราง Inbound Rules ของ sg-alb, sg-web, sg-int-alb, sg-app, sg-db แสดงว่าผูก SG ID ต่อกันและไม่มี Port 22' }
+    ]
+  },
+  {
+    id: 'phase-3',
+    number: 'Phase 3',
+    title: 'การสร้าง IAM Roles แบบ Least Privilege และ AWS Secrets Manager',
+    steps: [
+      {
+        title: '3.1 สร้าง IAM Role (ApexEC2InstanceProfile)',
+        inst: 'IAM -> Roles -> EC2 -> แนบนโยบาย AmazonSSMManagedInstanceCore และ CloudWatchAgentServerPolicy',
+        security: 'Zero Key Storage: เซิร์ฟเวอร์ใช้ Role ชั่วคราว ไม่ต้องมี Access Key / Secret Key ในเซิร์ฟเวอร์'
+      },
+      {
+        title: '3.2 บันทึกข้อมูลลับใน AWS Secrets Manager',
+        inst: 'Secrets Manager -> Store a new secret -> Secret name: apex/prod/app เก็บค่า JWT_SECRET และ credentials ฐานข้อมูล'
+      }
+    ],
+    evidences: [
+      { id: 'S08', title: 'IAM Role ApexEC2InstanceProfile', checklist: 'หน้ารายละเอียด Role แสดงนโยบาย SSM และ CloudWatch' },
+      { id: 'S09', title: 'AWS Secrets Manager', checklist: 'หน้ารายการ Secret apex/prod/app สถานะ Active (ปิดซ่อนค่า Secret String)' }
+    ]
+  },
+  {
+    id: 'phase-4',
+    number: 'Phase 4',
+    title: 'การติดตั้ง Amazon RDS PostgreSQL Multi-AZ (DB Tier - Isolated)',
+    steps: [
+      {
+        title: '4.1 สร้าง DB Subnet Group (apex-db-subnet-group)',
+        inst: 'RDS -> Subnet groups -> ผูก Subnet 10.0.20.0/24 และ 10.0.21.0/24 (Isolated Subnets)'
+      },
+      {
+        title: '4.2 สร้าง PostgreSQL Database (Multi-AZ, Encrypted, Public Access = No)',
+        inst: 'Engine: PostgreSQL 16 -> Multi-AZ DB Instance -> VPC: apex-predict-vpc -> Public access: No -> SG: sg-db -> Enable KMS encryption',
+        security: 'Air-Gapped Storage: ฐานข้อมูลตัดขาดจากโลกภายนอก 100% และเข้ารหัสด้วย KMS AES-256'
+      }
+    ],
+    evidences: [
+      { id: 'S10', title: 'RDS PostgreSQL Multi-AZ Details', checklist: 'หน้ารายละเอียด RDS แสดง Multi-AZ: Yes, Encryption: Enabled, Public access: No, SG: sg-db' }
+    ]
+  },
+  {
+    id: 'phase-5',
+    number: 'Phase 5',
+    title: 'การสร้าง App Tier Launch Template, Auto Scaling Group และ Internal ALB',
+    steps: [
+      {
+        title: '5.1 สร้าง Target Group (apex-app-tg) และ Internal ALB (apex-internal-alb)',
+        inst: 'Target Type: Instances, Port: 5000, Health check: /api/health -> Scheme: Internal, Subnets: Private App 2a/2b'
+      },
+      {
+        title: '5.2 สร้าง Launch Template (apex-app-template) และ Auto Scaling Group',
+        inst: 'AMI: Amazon Linux 2023, SG: sg-app, IAM Profile: ApexEC2InstanceProfile, ASG: Desired 2, Min 2, Max 6'
+      }
+    ],
+    evidences: [
+      { id: 'S11', title: 'Internal ALB apex-internal-alb', checklist: 'Load Balancer แสดง Scheme: Internal, VPC: apex-predict-vpc, Listener: Port 5000' },
+      { id: 'S12', title: 'App ASG & Target Group Healthy', checklist: 'ASG แสดง Instances 2 ตัวใน Private Subnets และ Target Group แสดงสถานะ Healthy' }
+    ]
+  },
+  {
+    id: 'phase-6',
+    number: 'Phase 6',
+    title: 'การสร้าง Web Tier Launch Template และ Auto Scaling Group (Nginx)',
+    steps: [
+      {
+        title: '6.1 สร้าง Target Group (apex-web-tg) และ Web ASG (apex-web-asg)',
+        inst: 'Port: 80, Health check: / -> ASG กระจายใน Public Subnet 1a/1b ผูกกับ apex-web-tg'
+      }
+    ],
+    evidences: [
+      { id: 'S13', title: 'Web ASG & Target Group Healthy', checklist: 'Instances ใน Public Subnets สถานะ Healthy บน Target Group apex-web-tg' }
+    ]
+  },
+  {
+    id: 'phase-7',
+    number: 'Phase 7',
+    title: 'การติดตั้ง Edge Tier: ACM (TLS 1.3), Public ALB, AWS WAF และ Route 53',
+    steps: [
+      {
+        title: '7.1 ขอใบรับรอง SSL/TLS ผ่าน AWS Certificate Manager (ACM)',
+        inst: 'ACM -> Request public certificate -> DNS validation รอจนสถานะ Issued'
+      },
+      {
+        title: '7.2 สร้าง Public ALB (apex-public-alb) พร้อม Listener HTTPS 443 และ HTTP 80 Redirect',
+        inst: 'Listener 80 Redirect 301 ไป HTTPS 443 -> Listener 443 ส่งต่อเข้า apex-web-tg ด้วย Security Policy TLS 1.3'
+      },
+      {
+        title: '7.3 สร้าง AWS WAF Web ACL (apex-waf-acl) ผูกกับ Public ALB',
+        inst: 'เพิ่ม AWSManagedRulesCommonRuleSet, SQLiRuleSet, KnownBadInputsRuleSet และ Rate-based 1,000 req / 5 min'
+      },
+      {
+        title: '7.4 สร้าง DNS Record บน Route 53 ชี้ Alias เข้าหา Public ALB',
+        inst: 'A Record (Alias) -> ชี้ไปยัง DNS Name ของ apex-public-alb'
+      }
+    ],
+    evidences: [
+      { id: 'S14', title: 'ACM Certificate Issued', checklist: 'หน้า AWS Certificate Manager แสดงใบรับรองสถานะ Issued' },
+      { id: 'S15', title: 'Public ALB Listeners & Redirect', checklist: 'ALB แสดงกฎ HTTP: 80 Redirect to HTTPS: 443 และกฎ HTTPS: 443 พร้อมนโยบาย TLS 1.3' },
+      { id: 'S16', title: 'AWS WAF Web ACL Rules', checklist: 'หน้ารายการ Rules บน Web ACL และ Associated Resources ชี้หา Public ALB' },
+      { id: 'S17', title: 'Route 53 DNS Alias Record', checklist: 'หน้า Hosted Zone แสดง Record ชี้ Alias ไปยัง Public ALB' }
+    ]
+  },
+  {
+    id: 'phase-8',
+    number: 'Phase 8',
+    title: 'การตั้งค่า Monitoring, Logging (CloudWatch, SNS, CloudTrail & GuardDuty)',
+    steps: [
+      {
+        title: '8.1 สร้าง SNS Topic (apex-security-alerts) และ CloudWatch Alarms 4 ตัว',
+        inst: 'สร้าง Alarm CPU > 75%, ALB Unhealthy > 0, 5XX Rate > 1%, RDS Low Storage < 2GB'
+      },
+      {
+        title: '8.2 เปิดใช้งาน AWS CloudTrail และ Amazon GuardDuty',
+        inst: 'สร้าง Trail apex-mgmt-trail พร้อมเปิด Log File Validation และคลิก Enable GuardDuty'
+      }
+    ],
+    evidences: [
+      { id: 'S18', title: 'CloudWatch Alarms & SNS Subscription', checklist: 'หน้า CloudWatch Alarms แสดงสถานะ OK (สีเขียว) และการผูกเข้ากับ SNS Topic' },
+      { id: 'S19', title: 'AWS CloudTrail & GuardDuty Active', checklist: 'หน้า CloudTrail แสดงสถานะ Logging และ Amazon GuardDuty แสดงสถานะ Active' }
+    ]
+  },
+  {
+    id: 'phase-9',
+    number: 'Phase 9',
+    title: 'การตรวจสอบระบบแบบ End-to-End, SSM Session Manager และการสำรองข้อมูล',
+    steps: [
+      {
+        title: '9.1 รีโมตเข้าเครื่องผ่าน AWS Systems Manager (SSM) Session Manager',
+        inst: 'ไปที่ EC2 -> เลือก App Instance -> คลิก Connect -> เลือก Session Manager -> รัน curl localhost:5000/api/health',
+        security: 'พิสูจน์ว่าสามารถเข้าบริหารจัดการเซิร์ฟเวอร์ใน Private Subnet ได้โดยไม่ต้องมีพอร์ต 22 SSH'
+      },
+      {
+        title: '9.2 ทดสอบการใช้งานแอปพลิเคชันผ่าน HTTPS แบบสมบูรณ์',
+        inst: 'เปิดเบราว์เซอร์เข้าสู่ระบบ วางเดิมพัน และตรวจสอบแม่กุญแจเขียว (SSL/TLS)'
+      },
+      {
+        title: '9.3 จัดทำ Golden AMI Snapshot และ Manual RDS Backup',
+        inst: 'EC2 Image -> apex-web-golden-ami-v1 และ RDS Take snapshot -> apex-db-manual-snapshot-termproject'
+      }
+    ],
+    evidences: [
+      { id: 'S20', title: 'SSM Session Manager Terminal (No SSH)', checklist: 'หน้าต่างเว็บเทอร์มินัลของ AWS Systems Manager แสดงคำสั่งรันบนเครื่อง App Server' },
+      { id: 'S21', title: 'End-to-End HTTPS Web Application', checklist: 'หน้าเว็บแอปพลิเคชันทำงานสมบูรณ์ มีสัญลักษณ์กุญแจเขียว (HTTPS) แสดงสถานะ API Connected' },
+      { id: 'S22', title: 'EC2 Golden AMI & RDS Snapshot', checklist: 'หน้ารายการ AMIs และ RDS Snapshots พร้อมใช้งานสำหรับการกู้คืนระบบฉุกเฉิน' }
+    ]
+  },
+  {
+    id: 'phase-10',
+    number: 'Phase 10',
+    title: 'การลบทรัพยากรเพื่อควบคุมค่าใช้จ่าย (Resource Cleanup & Cost Control)',
+    steps: [
+      {
+        title: '10.1 ลบทรัพยากรตามลำดับที่ถูกต้องเพื่อป้องกันค่าใช้จ่ายสะสม',
+        inst: 'ลำดับการลบ: 1) Route 53 Records -> 2) WAF Web ACL -> 3) ASGs (ปรับ Desired = 0) -> 4) ALBs & Target Groups -> 5) RDS PostgreSQL (ปิด Deletion protection) -> 6) NAT Gateway -> 7) Release Elastic IP -> 8) VPC & Subnets',
+        security: 'Cost Governance: NAT Gateway, ALB, และ RDS Multi-AZ มีค่าใช้จ่ายรายชั่วโมง ควรลบออกหลังเก็บหลักฐานเสร็จสมบูรณ์'
+      }
+    ],
+    evidences: []
+  }
+];
+
+/* ==========================================================================
+   IMAGE STORAGE (IndexedDB for Persistent Storage)
+   ========================================================================== */
+const DB_NAME = 'ApexDeploymentGuideDB_v1';
+const STORE_NAME = 'screenshots';
+let dbInstance = null;
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = (e) => {
+      dbInstance = e.target.result;
+      resolve(dbInstance);
+    };
+    req.onerror = (e) => reject(e);
+  });
+}
+
+function saveImageToDB(item) {
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put(item);
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
+}
+
+function deleteImageFromDB(id) {
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
+}
+
+function getAllImagesFromDB() {
+  return new Promise((resolve, reject) => {
+    const tx = dbInstance.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = (e) => reject(e);
+  });
+}
+
+/* ==========================================================================
+   UI RENDERING
+   ========================================================================== */
+async function renderPhases() {
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+
+  const allImages = await getAllImagesFromDB();
+
+  PHASES.forEach(phase => {
+    const phaseEl = document.createElement('section');
+    phaseEl.className = 'phase-card';
+    phaseEl.id = phase.id;
+
+    let stepsHtml = '';
+    phase.steps.forEach(step => {
+      stepsHtml += `
+        <div class="step-item">
+          <div class="step-title"><i class="fa-solid fa-circle-check" style="color:var(--blue)"></i> ${step.title}</div>
+          <div class="step-inst">${step.inst}</div>
+          ${step.security ? `<div class="callout-blue"><b><i class="fa-solid fa-shield-halved"></i> เหตุผลด้าน Security สำหรับรายงาน:</b> ${step.security}</div>` : ''}
+        </div>
+      `;
+    });
+
+    let evidenceHtml = '';
+    if (phase.evidences && phase.evidences.length > 0) {
+      phase.evidences.forEach(ev => {
+        const evImages = allImages.filter(img => img.evidenceId === ev.id);
+        evidenceHtml += `
+          <div class="evidence-box" data-ev-id="${ev.id}">
+            <div class="evidence-head">
+              <span class="evidence-id"><i class="fa-solid fa-camera"></i> จุดเก็บภาพ [${ev.id}]: ${ev.title}</span>
+              <span class="phase-badge">${evImages.length} ภาพ</span>
+            </div>
+            <div class="evidence-checklist"><b>สิ่งที่ต้องเห็นในภาพ:</b> ${ev.checklist}</div>
+            
+            <div class="evidence-dropzone" onclick="triggerUpload('${ev.id}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${ev.id}')">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <div style="font-weight:600; color:var(--navy);">คลิกเพื่อเลือกไฟล์ หรือ ลากภาพหน้าจอมาวางที่นี่ (รองรับ Ctrl+V วางจาก Clipboard)</div>
+              <div style="font-size:11px; color:#64748B;">รองรับไฟล์ PNG, JPG, WebP</div>
+              <input type="file" id="file-${ev.id}" style="display:none;" accept="image/*" multiple onchange="handleFileSelect(event, '${ev.id}')">
+            </div>
+
+            <div class="evidence-preview-grid" id="grid-${ev.id}">
+              ${evImages.map(img => `
+                <div class="preview-card" data-img-id="${img.id}">
+                  <img src="${img.dataUrl}" alt="${img.caption}" onclick="openLightbox('${img.dataUrl}')">
+                  <input type="text" class="preview-caption-input" value="${img.caption}" placeholder="คำบรรยายภาพ..." onchange="updateCaption('${img.id}', this.value)">
+                  <button class="preview-delete-btn" onclick="removeImage('${img.id}')"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    phaseEl.innerHTML = `
+      <div class="phase-header">
+        <h3 class="phase-title"><span class="phase-tag">${phase.number}</span> ${phase.title}</h3>
+      </div>
+      <div class="phase-body">
+        ${stepsHtml}
+        ${evidenceHtml}
+      </div>
+    `;
+    container.appendChild(phaseEl);
+  });
+
+  updateEvidenceCounter(allImages.length);
+}
+
+function updateEvidenceCounter(count) {
+  const badge = document.getElementById('evidence-counter');
+  if (badge) badge.innerText = `${count} / 22 ภาพ`;
+}
+
+/* ==========================================================================
+   IMAGE UPLOAD & CLIPBOARD HANDLERS
+   ========================================================================== */
+let activeEvidenceId = 'S01';
+
+function triggerUpload(evidenceId) {
+  activeEvidenceId = evidenceId;
+  const input = document.getElementById(`file-${evidenceId}`);
+  if (input) input.click();
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('dragover');
+}
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('dragover');
+}
+function handleDrop(e, evidenceId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  if (e.dataTransfer && e.dataTransfer.files) {
+    processFiles(e.dataTransfer.files, evidenceId);
+  }
+}
+
+function handleFileSelect(e, evidenceId) {
+  if (e.target.files) {
+    processFiles(e.target.files, evidenceId);
+  }
+}
+
+// Global Clipboard Paste Handler (Ctrl+V)
+document.addEventListener('paste', (e) => {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      const file = items[i].getAsFile();
+      processFiles([file], activeEvidenceId);
+      break;
+    }
+  }
+});
+
+async function processFiles(files, evidenceId) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.type.startsWith('image/')) continue;
+
+    const dataUrl = await readFileAsDataURL(file);
+    const id = `${evidenceId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
+    const item = {
+      id: id,
+      evidenceId: evidenceId,
+      caption: `หลักฐาน ${evidenceId} — ${file.name || 'Screenshot'}`,
+      dataUrl: dataUrl,
+      timestamp: new Date().toISOString()
+    };
+    await saveImageToDB(item);
+  }
+  await renderPhases();
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function removeImage(id) {
+  if (confirm('ต้องการลบภาพหลักฐานนี้หรือไม่?')) {
+    await deleteImageFromDB(id);
+    await renderPhases();
+  }
+}
+
+async function updateCaption(id, newCaption) {
+  const all = await getAllImagesFromDB();
+  const target = all.find(item => item.id === id);
+  if (target) {
+    target.caption = newCaption;
+    await saveImageToDB(target);
+  }
+}
+
+/* Lightbox */
+function openLightbox(url) {
+  const modal = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  img.src = url;
+  modal.classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+
+/* ==========================================================================
+   EXPORT & BACKUP FUNCTIONALITY
+   ========================================================================== */
+async function exportToJSON() {
+  const allImages = await getAllImagesFromDB();
+  const formData = getFormData();
+  const backup = {
+    project: formData,
+    images: allImages,
+    exportedAt: new Date().toISOString()
+  };
+  const jsonStr = JSON.stringify(backup, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `apex_group2_deployment_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+async function downloadAllImagesZip() {
+  const allImages = await getAllImagesFromDB();
+  if (allImages.length === 0) {
+    alert('ยังไม่มีภาพหน้าจอที่อัปโหลดไว้ กรุณาอัปโหลดก่อนดาวน์โหลด');
+    return;
+  }
+  const zip = new JSZip();
+  allImages.forEach((img, idx) => {
+    const base64Data = img.dataUrl.split(',')[1];
+    const ext = img.dataUrl.substring(img.dataUrl.indexOf('/') + 1, img.dataUrl.indexOf(';'));
+    zip.file(`${img.evidenceId}_screenshot_${idx + 1}.${ext}`, base64Data, { base64: true });
+  });
+
+  const content = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(content);
+  a.download = `APEX_Group2_AWS_Screenshots_${new Date().toISOString().slice(0,10)}.zip`;
+  a.click();
+}
+
+/* Form Auto-save */
+function getFormData() {
+  return {
+    project: document.getElementById('form-project').value,
+    group: document.getElementById('form-group-name').value,
+    region: document.getElementById('form-region').value,
+    members: [
+      { name: document.getElementById('m1_name').value, id: document.getElementById('m1_id').value },
+      { name: document.getElementById('m2_name').value, id: document.getElementById('m2_id').value },
+      { name: document.getElementById('m3_name').value, id: document.getElementById('m3_id').value },
+      { name: document.getElementById('m4_name').value, id: document.getElementById('m4_id').value },
+      { name: document.getElementById('m5_name').value, id: document.getElementById('m5_id').value }
+    ]
+  };
+}
+
+function saveFormState() {
+  localStorage.setItem('apex_guide_form_state', JSON.stringify(getFormData()));
+}
+
+function restoreFormState() {
+  const raw = localStorage.getItem('apex_guide_form_state');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data.project) document.getElementById('form-project').value = data.project;
+    if (data.group) document.getElementById('form-group-name').value = data.group;
+    if (data.region) document.getElementById('form-region').value = data.region;
+    if (data.members && data.members.length === 5) {
+      data.members.forEach((m, idx) => {
+        const num = idx + 1;
+        const nameInput = document.getElementById(`m${num}_name`);
+        const idInput = document.getElementById(`m${num}_id`);
+        if (nameInput) nameInput.value = m.name || '';
+        if (idInput) idInput.value = m.id || '';
+      });
+    }
+  } catch(e) {}
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target && (e.target.classList.contains('form-control') || e.target.closest('.member-table'))) {
+    saveFormState();
+  }
+});
+
+// App Initialization
+window.addEventListener('DOMContentLoaded', async () => {
+  await initDB();
+  restoreFormState();
+  await renderPhases();
+});
+</script>
+</body>
+</html>
+

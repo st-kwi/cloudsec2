@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รายงานการออกแบบสถาปัตยกรรมคลาวด์และความปลอดภัย — ระบบทายผลกีฬา (Group 2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ==========================================================================
+   THEME PALETTE: ขาว (White) / น้ำเงิน (Navy-Blue) / ส้ม (Orange-Amber)
+   ========================================================================== */
+:root {
+  --navy: #0B2A5B;
+  --navy-dark: #071C3D;
+  --navy-light: #123E82;
+  --blue: #1F6FEB;
+  --blue-50: #EAF2FF;
+  --blue-100: #D6E6FF;
+  --orange: #F28C28;
+  --orange-dark: #C26308;
+  --orange-50: #FFF5EA;
+  --orange-100: #FFE3C4;
+  --ink: #1E293B;
+  --ink-light: #334155;
+  --muted: #64748B;
+  --line: #DCE4F0;
+  --bg: #F4F7FB;
+  --card-bg: #FFFFFF;
+  --ok: #16A34A;
+  --ok-50: #EAF7EE;
+  --bad: #DC2626;
+  --bad-50: #FDECEC;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--ink);
+  background-color: var(--bg);
+  font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.6;
+}
+
+code, .mono {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.88em;
+}
+code {
+  background: var(--blue-50);
+  color: var(--navy);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  border: 1px solid var(--blue-100);
+}
+
+/* Page Setup for A4 Printing */
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+  @top-left {
+    content: "Cloud Security Architecture Report";
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 8pt;
+    color: #64748B;
+  }
+  @top-right {
+    content: "Group 2 · Secure 3-Tier Web Application on AWS";
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 8pt;
+    color: #F28C28;
+    font-weight: 600;
+  }
+  @bottom-left {
+    content: "ระบบทายผลกีฬา (Cloud Sports Prediction & Betting Platform)";
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 8pt;
+    color: #64748B;
+  }
+  @bottom-right {
+    content: "หน้า " counter(page);
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 8.5pt;
+    color: #0B2A5B;
+    font-weight: 700;
+  }
+}
+
+@page cover {
+  margin: 0;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-left { content: none; }
+  @bottom-right { content: none; }
+}
+
+.sheet {
+  background: #FFFFFF;
+  width: 210mm;
+  margin: 10mm auto;
+  padding: 18mm 16mm;
+  box-shadow: 0 4px 20px rgba(11, 42, 91, 0.08);
+  border-radius: 4px;
+}
+
+@media print {
+  body { background: #FFFFFF; }
+  .sheet {
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    width: auto;
+  }
+  .no-print { display: none !important; }
+  .page-break { break-before: page; }
+  .avoid-break { break-inside: avoid; }
+}
+
+.page-break { break-before: page; }
+.avoid-break { break-inside: avoid; }
+
+/* Action Toolbar */
+.floating-bar {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
+.btn-action {
+  font-family: inherit;
+  font-size: 9.5pt;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+}
+.btn-primary { background: var(--blue); color: #FFF; }
+.btn-primary:hover { background: #1358c2; }
+.btn-orange { background: var(--orange); color: #FFF; }
+.btn-orange:hover { background: var(--orange-dark); }
+.btn-outline { background: #FFF; color: var(--navy); border: 1.5px solid var(--navy); }
+.btn-outline:hover { background: var(--blue-50); }
+
+/* Banner Note */
+.tip-banner {
+  position: fixed;
+  bottom: 18px;
+  left: 24px;
+  z-index: 999;
+  background: #FFFFFF;
+  border-left: 5px solid var(--orange);
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  max-width: 440px;
+  font-size: 9pt;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   COVER PAGE DESIGN
+   ========================================================================== */
+.cover-page {
+  page: cover;
+  width: 210mm;
+  min-height: 297mm;
+  height: 297mm;
+  margin: 10mm auto;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(11, 42, 91, 0.1);
+}
+@media print {
+  .cover-page { margin: 0; box-shadow: none; height: 100vh; }
+}
+
+.cover-header {
+  background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-light) 100%);
+  color: #FFFFFF;
+  padding: 24mm 20mm 16mm 20mm;
+  position: relative;
+}
+.cover-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 5px;
+  background: linear-gradient(90deg, var(--orange) 0%, #FFB800 100%);
+}
+.cover-badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14mm;
+}
+.badge-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 8.5pt;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge-orange { background: var(--orange); color: #FFFFFF; }
+.badge-glass { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #FFFFFF; }
+
+.cover-eyebrow {
+  font-size: 10.5pt;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #FFD2A0;
+}
+.cover-title {
+  font-size: 24pt;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 4mm 0 3mm 0;
+  color: #FFFFFF;
+}
+.cover-title .en-sub {
+  display: block;
+  font-size: 15pt;
+  font-weight: 500;
+  color: #CFE2FF;
+  margin-top: 2mm;
+}
+.cover-desc {
+  font-size: 11pt;
+  color: #E2ECFC;
+  margin-top: 5mm;
+  border-left: 3.5px solid var(--orange);
+  padding-left: 12px;
+  line-height: 1.5;
+}
+
+.cover-content {
+  padding: 12mm 20mm 6mm 20mm;
+  flex: 1;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5mm 8mm;
+  margin-bottom: 8mm;
+}
+.meta-field {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 9.8pt;
+}
+.meta-field label {
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+}
+.fill-line {
+  flex: 1;
+  min-height: 6.5mm;
+  border-bottom: 1.3px dotted #94A3B8;
+  padding: 0 4px;
+  color: var(--ink);
+  outline: none;
+}
+.fill-line:focus {
+  background: var(--orange-50);
+  border-bottom-color: var(--orange);
+}
+
+.members-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2mm 0 3mm 0;
+}
+.members-title {
+  margin: 0;
+  font-size: 13pt;
+  font-weight: 700;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.group-tag {
+  background: var(--orange);
+  color: #FFFFFF;
+  font-size: 10.5pt;
+  font-weight: 700;
+  padding: 3px 14px;
+  border-radius: 6px;
+}
+
+/* Member Form Table: Exactly 5 rows (ลำดับ, ชื่อ-นามสกุล, รหัสนักศึกษา) */
+table.members-form-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  margin-top: 2mm;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  border: 1px solid var(--line);
+}
+table.members-form-table th {
+  background: var(--navy);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: left;
+}
+table.members-form-table td {
+  border-bottom: 1px solid var(--line);
+  height: 12mm;
+  padding: 2px 10px;
+  vertical-align: middle;
+}
+table.members-form-table td.col-no {
+  width: 14mm;
+  text-align: center;
+  font-weight: 700;
+  color: var(--blue);
+  background: #F8FAFD;
+}
+table.members-form-table td.col-id {
+  width: 48mm;
+}
+table.members-form-table td[contenteditable] {
+  outline: none;
+  cursor: text;
+}
+table.members-form-table td[contenteditable]:empty::before {
+  content: "คลิกเพื่อกรอกข้อมูล...";
+  color: #94A3B8;
+  font-style: italic;
+  font-size: 9pt;
+}
+table.members-form-table td[contenteditable]:focus {
+  background: var(--orange-50);
+}
+table.members-form-table tr:nth-child(even) td {
+  background: #FAFCFF;
+}
+
+.cover-footer {
+  padding: 6mm 20mm 10mm 20mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  font-size: 8.5pt;
+  color: var(--muted);
+}
+.cover-footer .tech-stack {
+  display: flex;
+  gap: 5px;
+}
+.color-bar-strip {
+  width: 10mm;
+  height: 2.5mm;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   HEADINGS & CONTENT STYLING
+   ========================================================================== */
+h2.ch-header {
+  font-size: 16pt;
+  color: var(--navy);
+  margin: 0 0 4mm 0;
+  padding-bottom: 2.5mm;
+  border-bottom: 2.5px solid var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  break-after: avoid;
+}
+h2.ch-header .ch-number {
+  background: var(--orange);
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-size: 11pt;
+  font-weight: 700;
+  padding: 2px 9px;
+}
+h2.ch-header .ch-en {
+  font-size: 10pt;
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: auto;
+}
+
+h3 {
+  font-size: 12pt;
+  color: var(--blue);
+  margin: 5mm 0 2mm 0;
+  break-after: avoid;
+}
+h4 {
+  font-size: 10.5pt;
+  color: var(--navy);
+  margin: 3.5mm 0 1.5mm 0;
+  break-after: avoid;
+}
+
+p {
+  margin: 0 0 2.5mm 0;
+  text-align: justify;
+}
+ul, ol {
+  margin: 0 0 3mm 0;
+  padding-left: 6mm;
+}
+li { margin-bottom: 1mm; }
+
+/* Tables */
+table.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 9pt;
+  margin: 2.5mm 0 4.5mm 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+table.data-table thead th {
+  background: var(--navy);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 7px 8px;
+  text-align: left;
+}
+table.data-table thead th.center, table.data-table tbody td.center {
+  text-align: center;
+}
+table.data-table tbody td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+}
+table.data-table tbody tr:nth-child(even) td {
+  background: #F8FAFD;
+}
+table.data-table.orange-header thead th {
+  background: var(--orange);
+}
+table.data-table.blue-header thead th {
+  background: var(--blue);
+}
+
+.pill {
+  display: inline-block;
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  font-size: 7.8pt;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pill-orange { background: var(--orange-50); color: var(--orange-dark); border: 1px solid var(--orange-100); }
+.pill-blue { background: var(--blue-50); color: var(--blue); border: 1px solid var(--blue-100); }
+.pill-navy { background: #EEF1F8; color: var(--navy); border: 1px solid #CBD3E6; }
+.pill-green { background: var(--ok-50); color: var(--ok); }
+.pill-red { background: var(--bad-50); color: var(--bad); }
+
+/* Principles Comparison Block */
+.principle-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 0 0 4mm 0;
+  overflow: hidden;
+  break-inside: avoid;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.principle-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2.5mm 4mm;
+  background: linear-gradient(90deg, var(--blue-50), #FFFFFF);
+  border-bottom: 1px solid var(--line);
+}
+.principle-badge-num {
+  width: 7mm;
+  height: 7mm;
+  border-radius: 6px;
+  background: var(--navy);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 10pt;
+  flex: none;
+}
+.principle-card-head h4 {
+  margin: 0;
+  font-size: 11pt;
+  color: var(--navy);
+}
+.principle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 0;
+}
+.principle-col {
+  padding: 3mm 4mm;
+  font-size: 9.3pt;
+}
+.principle-col.concept-col {
+  border-right: 1px dashed var(--line);
+  background: #FCFDFF;
+}
+.principle-tag {
+  display: inline-block;
+  font-size: 7.8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-bottom: 1.5mm;
+}
+.concept-col .principle-tag { background: var(--blue-50); color: var(--blue); }
+.impl-col .principle-tag { background: var(--orange-50); color: var(--orange-dark); }
+.principle-card-foot {
+  background: #F9FAFC;
+  border-top: 1px solid var(--line);
+  padding: 1.8mm 4mm;
+  font-size: 8.5pt;
+  color: var(--muted);
+}
+
+/* Callout Box */
+.info-callout {
+  border-radius: 8px;
+  padding: 3mm 4mm;
+  margin: 3mm 0 4mm 0;
+  font-size: 9.5pt;
+  break-inside: avoid;
+  border-left: 4px solid var(--blue);
+  background: var(--blue-50);
+}
+.warn-callout {
+  border-radius: 8px;
+  padding: 3mm 4mm;
+  margin: 3mm 0 4mm 0;
+  font-size: 9.5pt;
+  break-inside: avoid;
+  border-left: 4px solid var(--orange);
+  background: var(--orange-50);
+}
+
+/* Diagram Box */
+.diagram-container {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3mm;
+  background: #FFFFFF;
+  margin: 3mm 0 4mm 0;
+}
+.diagram-container svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.table-caption {
+  font-size: 8.8pt;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1.5mm;
+  margin-bottom: 3.5mm;
+}
+.table-caption b { color: var(--navy); }
+
+/* Quick KPI Grid */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2.5mm;
+  margin: 3.5mm 0 5mm 0;
+}
+.kpi-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 3mm 1mm;
+  text-align: center;
+  background: #FFFFFF;
+}
+.kpi-box .val {
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--blue);
+  line-height: 1.1;
+}
+.kpi-box:nth-child(even) .val { color: var(--orange); }
+.kpi-box .lbl {
+  font-size: 8pt;
+  color: var(--muted);
+  margin-top: 1mm;
+  line-height: 1.25;
+}
+</style>
+</head>
+<body>
+
+<!-- Floating Action Bar (Hidden during Print) -->
+<div class="floating-bar no-print">
+  <button class="btn-action btn-outline" onclick="resetForm()"><i class="fa-solid fa-rotate-left"></i> ล้างข้อมูลฟอร์ม</button>
+  <button class="btn-action btn-primary" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> พิมพ์ / บันทึก PDF</button>
+</div>
+
+<!-- Inline Helper Tip -->
+<div class="tip-banner no-print">
+  <b><i class="fa-solid fa-pen-to-square" style="color:var(--orange)"></i> กรอกข้อมูลสมาชิกกลุ่ม Group 2 ได้ทันที:</b><br>
+  คลิกที่ช่องเส้นประบนหน้าปก (รายวิชา, อาจารย์, ชื่อ-นามสกุล, รหัสนักศึกษา) เพื่อพิมพ์ข้อมูล ระบบจะจำข้อมูลไว้ในเบราว์เซอร์อัตโนมัติ จากนั้นกดปุ่ม <b>"พิมพ์ / บันทึก PDF"</b> (ตั้งค่า Destination = Save as PDF และเปิด Background graphics)
+</div>
+
+<!-- ========================================================================
+     PAGE 1: COVER PAGE (A4 Full)
+     ======================================================================== -->
+<section class="cover-page">
+  <div class="cover-header">
+    <div class="cover-badge-row">
+      <span class="badge-pill badge-orange"><i class="fa-solid fa-graduation-cap"></i> TERM PROJECT</span>
+      <span class="badge-pill badge-glass"><i class="fa-solid fa-shield-halved"></i> Cloud Security Architecture</span>
+      <span class="badge-pill badge-glass"><i class="fa-brands fa-aws"></i> AWS ap-southeast-1</span>
+      <span class="badge-pill badge-glass">Version 1.0</span>
+    </div>
+    <div class="cover-eyebrow">Cloud Security Architecture Report</div>
+    <h1 class="cover-title">ระบบทายผลกีฬา
+      <span class="en-sub">Cloud Sports Prediction &amp; Betting Platform</span>
+    </h1>
+    <div class="cover-desc">
+      <b>Secure 3-Tier Web Application on AWS</b><br>
+      เอกสารการออกแบบสถาปัตยกรรมคลาวด์ ความปลอดภัย และโครงสร้างระบบเครือข่าย<br>
+      <span style="font-size:9.5pt; color:#CFE2FF;">การวิเคราะห์หลักการแนวคิด · การดำเนินการตามแนวคิด · ตาราง Routing Table · Security Groups Matrix</span>
+    </div>
+  </div>
+
+  <div class="cover-content">
+    <!-- Metadata Grid -->
+    <div class="meta-grid">
+      <div class="meta-field"><label>รายวิชา:</label><span class="fill-line" contenteditable="true" data-key="gemini_course"></span></div>
+      <div class="meta-field"><label>รหัสวิชา:</label><span class="fill-line" contenteditable="true" data-key="gemini_code"></span></div>
+      <div class="meta-field"><label>อาจารย์ผู้สอน:</label><span class="fill-line" contenteditable="true" data-key="gemini_prof"></span></div>
+      <div class="meta-field"><label>ภาคการศึกษา / ปี:</label><span class="fill-line" contenteditable="true" data-key="gemini_term"></span></div>
+      <div class="meta-field"><label>คณะ / สาขาวิชา:</label><span class="fill-line" contenteditable="true" data-key="gemini_faculty"></span></div>
+      <div class="meta-field"><label>วันที่ส่งรายงาน:</label><span class="fill-line" contenteditable="true" data-key="gemini_date"></span></div>
+    </div>
+
+    <!-- Members Form (Group 2: 5 members, exactly: ลำดับ, ชื่อ-นามสกุล, รหัสนักศึกษา) -->
+    <div class="members-section-header">
+      <h3 class="members-title"><i class="fa-solid fa-users" style="color:var(--blue)"></i> รายชื่อสมาชิกกลุ่ม (Group Members)</h3>
+      <span class="group-tag">GROUP 2</span>
+    </div>
+
+    <table class="members-form-table">
+      <thead>
+        <tr>
+          <th style="width:14mm; text-align:center;">ลำดับ</th>
+          <th>ชื่อ - นามสกุล</th>
+          <th style="width:50mm;">รหัสนักศึกษา</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-no">1</td>
+          <td contenteditable="true" data-key="g2_m1_name"></td>
+          <td class="col-id" contenteditable="true" data-key="g2_m1_id"></td>
+        </tr>
+        <tr>
+          <td class="col-no">2</td>
+          <td contenteditable="true" data-key="g2_m2_name"></td>
+          <td class="col-id" contenteditable="true" data-key="g2_m2_id"></td>
+        </tr>
+        <tr>
+          <td class="col-no">3</td>
+          <td contenteditable="true" data-key="g2_m3_name"></td>
+          <td class="col-id" contenteditable="true" data-key="g2_m3_id"></td>
+        </tr>
+        <tr>
+          <td class="col-no">4</td>
+          <td contenteditable="true" data-key="g2_m4_name"></td>
+          <td class="col-id" contenteditable="true" data-key="g2_m4_id"></td>
+        </tr>
+        <tr>
+          <td class="col-no">5</td>
+          <td contenteditable="true" data-key="g2_m5_name"></td>
+          <td class="col-id" contenteditable="true" data-key="g2_m5_id"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cover-footer">
+    <div>
+      <div style="font-weight:700; color:var(--navy); font-size:9.5pt;">Secure 3-Tier Multi-AZ · Zero Public SSH · Defense-in-Depth</div>
+      <div>Public Web Tier · Private App Tier · Isolated DB Tier — AWS VPC 10.0.0.0/16</div>
+    </div>
+    <div class="tech-stack">
+      <span class="color-bar-strip" style="background:var(--orange);"></span>
+      <span class="color-bar-strip" style="background:var(--blue);"></span>
+      <span class="color-bar-strip" style="background:var(--navy);"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     PAGE 2: EXECUTIVE SUMMARY & OBJECTIVES
+     ======================================================================== -->
+<section class="sheet page-break">
+  <h2 class="ch-header"><span class="ch-number">1</span>บทสรุปผู้บริหาร <span class="ch-en">Executive Summary</span></h2>
+  <p>รายงานฉบับนี้จัดทำขึ้นเพื่อนำเสนอผลการศึกษา ออกแบบ และติดตั้งระบบ **ระบบทายผลกีฬา (Cloud Sports Prediction &amp; Betting Platform - APEX PREDICT)** ภายใต้สถาปัตยกรรม **Secure 3-Tier Web Application บน Amazon Web Services (AWS)** โดยมุ่งเน้นการปฏิบัติตามมาตรฐานความปลอดภัยคลาวด์ระดับสากล ได้แก่ <b>AWS Well-Architected Framework (Security Pillar)</b>, <b>CIS AWS Foundations Benchmark</b>, และ <b>OWASP Top 10</b></p>
+  
+  <p>ระบบถูกแบ่งแยกการทำงานออกเป็น 3 ระดับอย่างเด็ดขาดข้าม 2 Availability Zones (AZ-a และ AZ-b) ในภูมิภาคเอเชียตะวันออกเฉียงใต้ (Singapore - <code>ap-southeast-1</code>) ได้แก่:
+    <b>1) Public Web Tier</b> (Nginx Reverse Proxy และ Application Load Balancer), 
+    <b>2) Private App Tier</b> (Node.js Betting &amp; Prediction Engine ทำงานอยู่เบื้องหลัง NAT Gateway), และ 
+    <b>3) Isolated DB Tier</b> (Amazon RDS PostgreSQL Multi-AZ ซึ่งตัดขาดจากอินเทอร์เน็ตภายนอก 100%)
+  </p>
+
+  <div class="kpi-row">
+    <div class="kpi-box"><div class="val">3</div><div class="lbl">Tiers<br>Web · App · DB</div></div>
+    <div class="kpi-box"><div class="val">2</div><div class="lbl">Availability Zones<br>Multi-AZ (1a, 1b)</div></div>
+    <div class="kpi-box"><div class="val">6</div><div class="lbl">Subnets<br>2 Pub · 2 Priv · 2 Iso</div></div>
+    <div class="kpi-box"><div class="val">3</div><div class="lbl">Route Tables<br>IGW · NAT · Local</div></div>
+    <div class="kpi-box"><div class="val">5</div><div class="lbl">Security Groups<br>Chained Matrix</div></div>
+    <div class="kpi-box"><div class="val">0</div><div class="lbl">Open Port 22<br>Zero Public SSH</div></div>
+  </div>
+
+  <h2 class="ch-header" style="margin-top:6mm;"><span class="ch-number">2</span>วัตถุประสงค์และความต้องการของระบบ <span class="ch-en">Objectives &amp; Requirements</span></h2>
+  <h3>2.1 วัตถุประสงค์หลักของโครงงาน (Project Objectives)</h3>
+  <ol>
+    <li><b>การแบ่งแยกสิทธิ์และโซนเครือข่าย (Network Segmentation):</b> เพื่อป้องกันไม่ให้ผู้ไม่หวังดีสามารถเจาะเข้าถึงฐานข้อมูลที่มีความสำคัญสูงได้โดยตรง หากเกิดช่องโหว่ที่ชั้นเว็บเซิร์ฟเวอร์</li>
+    <li><b>การปฏิบัติตามหลักสิทธิ์น้อยที่สุด (Principle of Least Privilege):</b> กำหนดสิทธิ์ของทั้งผู้ใช้งาน, เครื่องเซิร์ฟเวอร์ (IAM Instance Roles), และกฎไฟร์วอลล์ (Security Groups) ให้มีสิทธิ์เท่าที่จำเป็นต้องใช้เท่านั้น</li>
+    <li><b>การเข้าถึงเครื่องอย่างปลอดภัยโดยไม่เปิดพอร์ต 22 (Zero Public SSH via AWS SSM):</b> ยกเลิกการเปิดพอร์ต SSH สู่สาธารณะ และยกเลิกการใช้ Bastion Host เพื่อขจัดความเสี่ยงจากการถูกโจมตีแบบ Brute-Force</li>
+    <li><b>การปกป้องข้อมูลและการเข้ารหัสทั้งระบบ (End-to-End Cryptography):</b> เข้ารหัสข้อมูลทั้ง In-Transit (TLS 1.3) และ At-Rest (AWS KMS AES-256) พร้อมบริหารความลับผ่าน AWS Secrets Manager</li>
+    <li><b>ความพร้อมใช้งานสูงและการขยายตัวอัตโนมัติ (High Availability &amp; Elasticity):</b> กระจายเวิร์กโหลดข้าม AZ และใช้ Auto Scaling Group เพื่อรองรับการทายผลช่วงบิ๊กแมตช์</li>
+  </ol>
+
+  <h3>2.2 ความต้องการด้านความปลอดภัย (Security Requirements)</h3>
+  <table class="data-table blue-header">
+    <thead>
+      <tr>
+        <th style="width:12%;">รหัส</th>
+        <th style="width:26%;">ข้อกำหนดด้านความปลอดภัย</th>
+        <th>แนวทางและกลไกที่นำมาแก้ปัญหา (Implementation)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>SEC-01</b></td>
+        <td>Database Isolation</td>
+        <td>ฐานข้อมูล RDS ถูกวางใน Isolated Subnet ที่ไม่มี Route <code>0.0.0.0/0</code> และกำหนด <code>Publicly Accessible = No</code></td>
+      </tr>
+      <tr>
+        <td><b>SEC-02</b></td>
+        <td>Traffic Inspection</td>
+        <td>ติดตั้ง AWS WAF เชื่อมต่อหน้า Application Load Balancer บังคับใช้ Managed Rules (SQLi, XSS, Bad Inputs) และ Rate Limiting</td>
+      </tr>
+      <tr>
+        <td><b>SEC-03</b></td>
+        <td>In-Transit Encryption</td>
+        <td>ALB บังคับใช้ SSL/TLS Certificate จาก AWS ACM พร้อม Redirect HTTP พอร์ต 80 สู่ HTTPS พอร์ต 443 ด้วยรหัส 301</td>
+      </tr>
+      <tr>
+        <td><b>SEC-04</b></td>
+        <td>At-Rest Encryption</td>
+        <td>EBS Volumes และ RDS Database ถูกเข้ารหัสด้วย AWS KMS CMK (Key: <code>aws/rds</code> และ <code>aws/ebs</code>) อัลกอริทึม AES-256</td>
+      </tr>
+      <tr>
+        <td><b>SEC-05</b></td>
+        <td>Zero Bastion SSH</td>
+        <td>ไม่เปิดพอร์ต 22 ใน Security Group ใดๆ ผู้ดูแลระบบเข้าถึงเครื่องผ่าน AWS Systems Manager (SSM) Session Manager</td>
+      </tr>
+      <tr>
+        <td><b>SEC-06</b></td>
+        <td>Data Integrity (Race Condition)</td>
+        <td>แอปพลิเคชันใช้ ACID Mutex Lock (จำลอง <code>SELECT ... FOR UPDATE</code>) ป้องกัน Double Spending ขณะตัดแต้มทายผล</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========================================================================
+     PAGE 3: PRINCIPLES VS IMPLEMENTATION
+     ======================================================================== -->
+<section class="sheet page-break">
+  <h2 class="ch-header"><span class="ch-number">3</span>หลักการแนวคิด และการดำเนินการตามแนวคิด <span class="ch-en">Design Principles vs Implementation</span></h2>
+  <p>ในหัวข้อนี้จะอธิบายรายละเอียดว่าระบบยึดถือ <b>หลักการแนวคิด (Security &amp; Architectural Concepts)</b> ใดบ้าง และทางกลุ่มได้ <b>ดำเนินการปฏิบัติจริงอย่างไรกับแนวคิดนั้น (How Implemented on AWS &amp; App)</b> เพื่อให้เกิดความชัดเจนตามเกณฑ์ประเมินโครงงาน:</p>
+
+  <!-- Principle 1 -->
+  <div class="principle-card">
+    <div class="principle-card-head">
+      <div class="principle-badge-num">1</div>
+      <div><h4>การป้องกันความปลอดภัยเชิงลึก (Defense-in-Depth)</h4></div>
+    </div>
+    <div class="principle-grid">
+      <div class="principle-col concept-col">
+        <span class="principle-tag">หลักการแนวคิด</span><br>
+        ความปลอดภัยไม่สามารถพึ่งพากลไกป้องกันเพียงจุดเดียว (Single Layer of Defense) ได้ หากปราการด่านหน้าถูกเจาะหรือตั้งค่าผิดพลาด ปราการด่านถัดไปต้องสามารถสกัดกั้นการโจมตีได้ทันที
+      </div>
+      <div class="principle-col impl-col">
+        <span class="principle-tag">การดำเนินการจริง</span>
+        <ul>
+          <li><b>Edge Tier:</b> กรองคำขอที่ AWS WAF (L7) และ AWS Shield Standard (L3/L4)</li>
+          <li><b>Network Tier:</b> กรองด้วย Chained Security Groups และ Subnet NACLs</li>
+          <li><b>Host Tier:</b> ติดตั้ง Nginx Reverse Proxy ซ่อน IP จริง และเปิดใช้งาน IMDSv2</li>
+          <li><b>Application Tier:</b> ตรวจสอบ JWT Token, RBAC, และ Input Sanitization</li>
+          <li><b>Data Tier:</b> RDS ใน Isolated Subnet เข้ารหัสด้วย AWS KMS</li>
+        </ul>
+      </div>
+    </div>
+    <div class="principle-card-foot">หลักฐานการตรวจสอบ: <span class="pill pill-orange">S07 Security Groups</span> <span class="pill pill-orange">S15 ALB Listeners</span> <span class="pill pill-orange">S16 WAF Web ACL</span></div>
+  </div>
+
+  <!-- Principle 2 -->
+  <div class="principle-card">
+    <div class="principle-card-head">
+      <div class="principle-badge-num">2</div>
+      <div><h4>การให้สิทธิ์น้อยที่สุด (Principle of Least Privilege) &amp; Zero Trust</h4></div>
+    </div>
+    <div class="principle-card-head-body"></div>
+    <div class="principle-grid">
+      <div class="principle-col concept-col">
+        <span class="principle-tag">หลักการแนวคิด</span><br>
+        ทุก Entity (ผู้ใช้, เครื่องเซิร์ฟเวอร์, ฐานข้อมูล) จะได้รับสิทธิ์เท่าที่จำเป็นต่อการปฏิบัติหน้าที่เท่านั้น และ "ไม่เชื่อถือใครโดยปริยายแม้จะอยู่ในเครือข่ายเดียวกัน" (Zero Trust)
+      </div>
+      <div class="principle-col impl-col">
+        <span class="principle-tag">การดำเนินการจริง</span>
+        <ul>
+          <li>EC2 ใช้ <b>IAM Instance Profile</b> ที่แนบเฉพาะ <code>AmazonSSMManagedInstanceCore</code> และ <code>CloudWatchAgentServerPolicy</code></li>
+          <li>ไม่มีการฝัง AWS Access Key / Secret Key ในโค้ดหรือบน Server โดยเด็ดขาด</li>
+          <li>Security Groups ยอมรับทราฟฟิกเฉพาะ <b>Security Group ID ของชั้นก่อนหน้า</b> (ไม่ระบุ IP กว้าง)</li>
+          <li>ฐานข้อมูล <code>sg-db</code> รับเฉพาะ <code>sg-app</code> บนพอร์ต 5432 และ Deny Outbound 100%</li>
+        </ul>
+      </div>
+    </div>
+    <div class="principle-card-foot">หลักฐานการตรวจสอบ: <span class="pill pill-orange">S08 IAM Role</span> <span class="pill pill-orange">S09 Secrets Manager</span> <span class="pill pill-orange">S07 Security Groups</span></div>
+  </div>
+
+  <!-- Principle 3 -->
+  <div class="principle-card">
+    <div class="principle-card-head">
+      <div class="principle-badge-num">3</div>
+      <div><h4>การยกเลิกการเปิดพอร์ต SSH สู่สาธารณะ (Zero Public SSH via AWS SSM)</h4></div>
+    </div>
+    <div class="principle-grid">
+      <div class="principle-col concept-col">
+        <span class="principle-tag">หลักการแนวคิด</span><br>
+        พอร์ต 22 (SSH) เป็นเป้าหมายอันดับหนึ่งของการโจมตีแบบ Brute-force และการสแกนหาช่องโหว่ การเปิด Bastion Host ทำให้เกิดจุดอ่อน (Single Point of Compromise) บน Public Subnet
+      </div>
+      <div class="principle-col impl-col">
+        <span class="principle-tag">การดำเนินการจริง</span>
+        <ul>
+          <li>ปิด TCP พอร์ต 22 ในทุก Security Group และไม่สร้าง EC2 Key Pair</li>
+          <li>เชื่อมต่อบริหารจัดการเซิร์ฟเวอร์ผ่าน <b>AWS Systems Manager (SSM) Session Manager</b></li>
+          <li>การเข้าถึงยืนยันตัวตนผ่าน AWS IAM + Multi-Factor Authentication (MFA)</li>
+          <li>คำสั่งที่พิมพ์ผ่านเทอร์มินัลทั้งหมดถูกบันทึกลงใน AWS CloudWatch Logs / S3 โดยไม่สามารถลบประวัติได้</li>
+        </ul>
+      </div>
+    </div>
+    <div class="principle-card-foot">หลักฐานการตรวจสอบ: <span class="pill pill-orange">S01 Root MFA</span> <span class="pill pill-orange">S07 Zero Port 22</span> <span class="pill pill-orange">S20 SSM Session Manager</span></div>
+  </div>
+
+  <!-- Principle 4 -->
+  <div class="principle-card">
+    <div class="principle-card-head">
+      <div class="principle-badge-num">4</div>
+      <div><h4>การปกป้องข้อมูลและการเข้ารหัส (Data Protection In-Transit &amp; At-Rest)</h4></div>
+    </div>
+    <div class="principle-grid">
+      <div class="principle-col concept-col">
+        <span class="principle-tag">หลักการแนวคิด</span><br>
+        ข้อมูลสำคัญ เช่น รหัสผ่าน, ข้อมูลกระเป๋าเงิน, สถิติการทายผล ต้องได้รับการคุ้มครองไม่ให้ถูกดักจับ (Sniffing) หรือถูกขโมยจากดิสก์ (Disk Theft) ได้
+      </div>
+      <div class="principle-col impl-col">
+        <span class="principle-tag">การดำเนินการจริง</span>
+        <ul>
+          <li><b>In-Transit:</b> ใช้ TLS 1.3 ผ่าน AWS ACM ร่วมกับนโยบาย <code>ELBSecurityPolicy-TLS13-1-2-2021-06</code></li>
+          <li><b>At-Rest:</b> Amazon RDS และ EBS ถูกเข้ารหัสด้วย AWS KMS (AES-256)</li>
+          <li>รหัสผ่าน Master Database และ JWT Secret ถูกเก็บและหมุนเวียนใน <b>AWS Secrets Manager</b></li>
+          <li>รหัสผ่านผู้ใช้ผ่านการ Hash ด้วยอัลกอริทึมที่ปลอดภัยก่อนจัดเก็บ</li>
+        </ul>
+      </div>
+    </div>
+    <div class="principle-card-foot">หลักฐานการตรวจสอบ: <span class="pill pill-orange">S09 Secrets Manager</span> <span class="pill pill-orange">S10 RDS Encryption</span> <span class="pill pill-orange">S14 ACM Issued</span></div>
+  </div>
+</section>
+
+<!-- ========================================================================
+     PAGE 4: ARCHITECTURE STRUCTURE & DIAGRAM
+     ======================================================================== -->
+<section class="sheet page-break">
+  <h2 class="ch-header"><span class="ch-number">4</span>โครงสร้างสถาปัตยกรรมระบบ <span class="ch-en">Architecture Structure</span></h2>
+  <p>สถาปัตยกรรมของระบบทายผลกีฬา (APEX PREDICT) ได้รับการออกแบบให้เป็นไปตามหลักการ 3-Tier Multi-AZ บน Amazon Web Services (AWS) โดยแยกส่วนชั้นนำเสนอ, ชั้นตรรกะประมวลผล, และชั้นฐานข้อมูลออกจากกันอย่างชัดเจน:</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 1000 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1F6FEB"/>
+        </marker>
+        <marker id="arr-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#F28C28"/>
+        </marker>
+      </defs>
+
+      <!-- Users & Edge -->
+      <rect x="20" y="20" width="160" height="640" rx="8" fill="#F8FAFD" stroke="#DCE4F0" stroke-width="1.5"/>
+      <text x="100" y="45" text-anchor="middle" font-size="12" font-weight="700" fill="#0B2A5B">Internet &amp; Edge</text>
+
+      <rect x="35" y="65" width="130" height="50" rx="25" fill="#0B2A5B"/>
+      <text x="100" y="88" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">Users / Clients</text>
+      <text x="100" y="103" text-anchor="middle" font-size="9" fill="#CFE2FF">0.0.0.0/0 (Internet)</text>
+
+      <rect x="35" y="145" width="130" height="65" rx="6" fill="#FFF" stroke="#F28C28" stroke-width="1.5"/>
+      <text x="100" y="168" text-anchor="middle" font-size="11" font-weight="700" fill="#0B2A5B">AWS WAF</text>
+      <text x="100" y="185" text-anchor="middle" font-size="8.5" fill="#64748B">SQLi / XSS Inspection</text>
+      <text x="100" y="199" text-anchor="middle" font-size="8.5" fill="#64748B">Rate Limit: 1000/5m</text>
+
+      <rect x="35" y="235" width="130" height="55" rx="6" fill="#FFF" stroke="#1F6FEB" stroke-width="1.5"/>
+      <text x="100" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#0B2A5B">Route 53</text>
+      <text x="100" y="275" text-anchor="middle" font-size="8.5" fill="#64748B">DNS &amp; Alias Record</text>
+
+      <rect x="35" y="315" width="130" height="55" rx="6" fill="#FFF" stroke="#1F6FEB" stroke-width="1.5"/>
+      <text x="100" y="338" text-anchor="middle" font-size="11" font-weight="700" fill="#0B2A5B">AWS ACM</text>
+      <text x="100" y="355" text-anchor="middle" font-size="8.5" fill="#64748B">SSL/TLS 1.3 Certificate</text>
+
+      <rect x="35" y="550" width="130" height="90" rx="6" fill="#FFF5EA" stroke="#FFE3C4"/>
+      <text x="100" y="575" text-anchor="middle" font-size="10" font-weight="700" fill="#C26308">Zero Public SSH</text>
+      <text x="100" y="593" text-anchor="middle" font-size="8.5" fill="#334155">• ไม่มี Port 22</text>
+      <text x="100" y="608" text-anchor="middle" font-size="8.5" fill="#334155">• เข้าผ่าน AWS SSM</text>
+      <text x="100" y="623" text-anchor="middle" font-size="8.5" fill="#334155">• Audit ผ่าน CloudTrail</text>
+
+      <!-- VPC Container -->
+      <rect x="200" y="20" width="780" height="640" rx="10" fill="#FCFDFF" stroke="#0B2A5B" stroke-width="2"/>
+      <text x="220" y="45" font-size="12" font-weight="700" fill="#0B2A5B">AWS VPC: apex-predict-vpc (10.0.0.0/16) — Region: ap-southeast-1 (Singapore)</text>
+
+      <!-- Internet Gateway & NAT -->
+      <rect x="220" y="65" width="150" height="40" rx="6" fill="#0B2A5B"/>
+      <text x="295" y="89" text-anchor="middle" font-size="10" font-weight="700" fill="#FFF">Internet Gateway (IGW)</text>
+
+      <rect x="620" y="65" width="150" height="40" rx="6" fill="#F28C28"/>
+      <text x="695" y="89" text-anchor="middle" font-size="10" font-weight="700" fill="#FFF">NAT Gateway (Public-1a)</text>
+
+      <!-- TIER 1: PUBLIC WEB TIER -->
+      <rect x="220" y="125" width="740" height="150" rx="8" fill="#FFF9F2" stroke="#F28C28" stroke-width="1.2"/>
+      <text x="235" y="145" font-size="11" font-weight="700" fill="#C26308">Tier 1: Public Web Tier (Route Table: rtb-public → 0.0.0.0/0 to IGW)</text>
+
+      <!-- Public ALB -->
+      <rect x="240" y="160" width="695" height="42" rx="6" fill="#FFF" stroke="#1F6FEB" stroke-width="1.5"/>
+      <text x="587" y="180" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B2A5B">Application Load Balancer (apex-public-alb) [Multi-AZ]</text>
+      <text x="587" y="194" text-anchor="middle" font-size="8.5" fill="#64748B">HTTPS :443 (ACM TLS 1.3) | HTTP :80 Redirect 301 to HTTPS | sg-alb</text>
+
+      <!-- Web Instances in AZ-a / AZ-b -->
+      <rect x="280" y="215" width="280" height="45" rx="6" fill="#FFF" stroke="#F28C28"/>
+      <text x="420" y="235" text-anchor="middle" font-size="10" font-weight="700" fill="#0B2A5B">EC2 Web-1 (Nginx Reverse Proxy)</text>
+      <text x="420" y="249" text-anchor="middle" font-size="8.5" fill="#64748B">Public Subnet 1a (10.0.1.10) | sg-web (:80 from sg-alb)</text>
+
+      <rect x="615" y="215" width="280" height="45" rx="6" fill="#FFF" stroke="#F28C28"/>
+      <text x="755" y="235" text-anchor="middle" font-size="10" font-weight="700" fill="#0B2A5B">EC2 Web-2 (Nginx Reverse Proxy)</text>
+      <text x="755" y="249" text-anchor="middle" font-size="8.5" fill="#64748B">Public Subnet 1b (10.0.2.10) | sg-web (:80 from sg-alb)</text>
+
+      <!-- TIER 2: PRIVATE APP TIER -->
+      <rect x="220" y="295" width="740" height="165" rx="8" fill="#F0F6FF" stroke="#1F6FEB" stroke-width="1.2"/>
+      <text x="235" y="315" font-size="11" font-weight="700" fill="#1F6FEB">Tier 2: Private App Tier (Route Table: rtb-private-app → 0.0.0.0/0 to NAT Gateway)</text>
+
+      <!-- Internal ALB -->
+      <rect x="240" y="330" width="695" height="35" rx="6" fill="#FFF" stroke="#1F6FEB"/>
+      <text x="587" y="352" text-anchor="middle" font-size="10" font-weight="700" fill="#0B2A5B">Internal ALB (apex-internal-alb) [Port 5000 | sg-int-alb]</text>
+
+      <!-- App Instances -->
+      <rect x="280" y="380" width="280" height="65" rx="6" fill="#FFF" stroke="#1F6FEB" stroke-width="1.5"/>
+      <text x="420" y="403" text-anchor="middle" font-size="10" font-weight="700" fill="#0B2A5B">EC2 App-1 (Node.js Betting Engine)</text>
+      <text x="420" y="418" text-anchor="middle" font-size="8.5" fill="#64748B">Private Subnet 2a (10.0.10.15) | sg-app</text>
+      <text x="420" y="432" text-anchor="middle" font-size="8.5" fill="#16A34A">• Mutex Lock • RBAC • No Public IP</text>
+
+      <rect x="615" y="380" width="280" height="65" rx="6" fill="#FFF" stroke="#1F6FEB" stroke-width="1.5"/>
+      <text x="755" y="403" text-anchor="middle" font-size="10" font-weight="700" fill="#0B2A5B">EC2 App-2 (Node.js Betting Engine)</text>
+      <text x="755" y="418" text-anchor="middle" font-size="8.5" fill="#64748B">Private Subnet 2b (10.0.11.15) | sg-app</text>
+      <text x="755" y="432" text-anchor="middle" font-size="8.5" fill="#16A34A">• Mutex Lock • RBAC • No Public IP</text>
+
+      <!-- TIER 3: ISOLATED DB TIER -->
+      <rect x="220" y="480" width="740" height="165" rx="8" fill="#F4F6FB" stroke="#0B2A5B" stroke-width="1.5"/>
+      <text x="235" y="500" font-size="11" font-weight="700" fill="#0B2A5B">Tier 3: Isolated Database Tier (Route Table: rtb-isolated-db → Local Only, ไม่มีเน็ต 100%)</text>
+
+      <!-- Primary DB -->
+      <rect x="280" y="515" width="280" height="110" rx="6" fill="#FFF" stroke="#0B2A5B" stroke-width="2"/>
+      <text x="420" y="538" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B2A5B">Amazon RDS PostgreSQL (Primary)</text>
+      <text x="420" y="555" text-anchor="middle" font-size="8.5" fill="#334155">Isolated Subnet 3a (10.0.20.50)</text>
+      <text x="420" y="572" text-anchor="middle" font-size="8.5" fill="#64748B">Port: 5432 (Inbound: sg-app only)</text>
+      <text x="420" y="589" text-anchor="middle" font-size="8.5" fill="#16A34A">Encrypted: AWS KMS (AES-256)</text>
+      <text x="420" y="606" text-anchor="middle" font-size="8.5" fill="#DC2626">Public Access: NO | Outbound: DENY ALL</text>
+
+      <!-- Standby Replica -->
+      <rect x="615" y="515" width="280" height="110" rx="6" fill="#FFF" stroke="#0B2A5B" stroke-dasharray="4 3"/>
+      <text x="755" y="538" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0B2A5B">RDS Standby Replica (Multi-AZ)</text>
+      <text x="755" y="555" text-anchor="middle" font-size="8.5" fill="#334155">Isolated Subnet 3b (10.0.21.50)</text>
+      <text x="755" y="572" text-anchor="middle" font-size="8.5" fill="#64748B">Synchronous Replication ข้าม AZ</text>
+      <text x="755" y="589" text-anchor="middle" font-size="8.5" fill="#16A34A">Automatic Failover</text>
+      <text x="755" y="606" text-anchor="middle" font-size="8.5" fill="#334155">Automated Backup 7 วัน + PITR</text>
+
+      <!-- Sync line -->
+      <line x1="560" y1="570" x2="615" y2="570" stroke="#0B2A5B" stroke-width="2" stroke-dasharray="3 3"/>
+      <text x="587" y="563" text-anchor="middle" font-size="8" font-weight="700" fill="#0B2A5B">Sync</text>
+    </svg>
+  </div>
+  <div class="table-caption"><b>รูปที่ 4.1:</b> แผนผังสถาปัตยกรรมคลาวด์ Secure 3-Tier Web Application บน AWS (Multi-AZ) ระบบ APEX PREDICT</div>
+</section>
+
+<!-- ========================================================================
+     PAGE 5: ROUTING TABLES & NETWORK ARCHITECTURE
+     ======================================================================== -->
+<section class="sheet page-break">
+  <h2 class="ch-header"><span class="ch-number">5</span>การออกแบบเครือข่าย และตาราง Routing Table <span class="ch-en">Network Design &amp; Routing</span></h2>
+  <p>VPC ถูกออกแบบด้วย CIDR Block <code>10.0.0.0/16</code> และแบ่ง Subnets ออกเป็น 6 ตัว เพื่อรองรับสถาปัตยกรรม 3 ระดับ กระจายข้าม 2 Availability Zones ได้แก่ <code>ap-southeast-1a</code> และ <code>ap-southeast-1b</code> โดยมีการจัดการเส้นทางการจราจรผ่านตาราง Routing Table 3 ชุดอย่างเป็นเอกเทศ:</p>
+
+  <h3>5.1 รายละเอียดการแบ่ง Subnet (Subnetting Allocation Table)</h3>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:16%;">Subnet Name</th>
+        <th style="width:14%;">Tier ชั้นงาน</th>
+        <th style="width:15%;">Availability Zone</th>
+        <th style="width:15%;">IPv4 CIDR</th>
+        <th style="width:20%;">Public IP Auto-Assign</th>
+        <th>หน้าที่และความสำคัญ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>public-subnet-1a</code></td>
+        <td><span class="pill pill-orange">Public Web</span></td>
+        <td><code>ap-southeast-1a</code></td>
+        <td><code>10.0.1.0/24</code></td>
+        <td><span class="pill pill-green">Enabled (Yes)</span></td>
+        <td>ALB Node 1, NAT Gateway, Web EC2-1</td>
+      </tr>
+      <tr>
+        <td><code>public-subnet-1b</code></td>
+        <td><span class="pill pill-orange">Public Web</span></td>
+        <td><code>ap-southeast-1b</code></td>
+        <td><code>10.0.2.0/24</code></td>
+        <td><span class="pill pill-green">Enabled (Yes)</span></td>
+        <td>ALB Node 2, Web EC2-2</td>
+      </tr>
+      <tr>
+        <td><code>private-app-subnet-2a</code></td>
+        <td><span class="pill pill-blue">Private App</span></td>
+        <td><code>ap-southeast-1a</code></td>
+        <td><code>10.0.10.0/24</code></td>
+        <td><span class="pill pill-red">Disabled (No)</span></td>
+        <td>App Engine Node 1 (Internal API :5000)</td>
+      </tr>
+      <tr>
+        <td><code>private-app-subnet-2b</code></td>
+        <td><span class="pill pill-blue">Private App</span></td>
+        <td><code>ap-southeast-1b</code></td>
+        <td><code>10.0.11.0/24</code></td>
+        <td><span class="pill pill-red">Disabled (No)</span></td>
+        <td>App Engine Node 2 (Internal API :5000)</td>
+      </tr>
+      <tr>
+        <td><code>isolated-db-subnet-3a</code></td>
+        <td><span class="pill pill-navy">Isolated DB</span></td>
+        <td><code>ap-southeast-1a</code></td>
+        <td><code>10.0.20.0/24</code></td>
+        <td><span class="pill pill-red">Disabled (No)</span></td>
+        <td>RDS PostgreSQL Primary (:5432)</td>
+      </tr>
+      <tr>
+        <td><code>isolated-db-subnet-3b</code></td>
+        <td><span class="pill pill-navy">Isolated DB</span></td>
+        <td><code>ap-southeast-1b</code></td>
+        <td><code>10.0.21.0/24</code></td>
+        <td><span class="pill pill-red">Disabled (No)</span></td>
+        <td>RDS Standby Replica (Multi-AZ Sync)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 ตารางเส้นทางเครือข่าย (Route Tables Configuration Matrix)</h3>
+  <table class="data-table orange-header">
+    <thead>
+      <tr>
+        <th style="width:20%;">Route Table Name</th>
+        <th style="width:16%;">Destination CIDR</th>
+        <th style="width:22%;">Target Gateway</th>
+        <th style="width:24%;">Associated Subnets</th>
+        <th>พฤติกรรมการเชื่อมต่อและความปลอดภัย</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="2"><b><code>rtb-public</code></b><br><span style="font-size:8pt;color:#64748B;">(Web Tier Route Table)</span></td>
+        <td><code>10.0.0.0/16</code></td>
+        <td><code>local</code></td>
+        <td rowspan="2">• <code>public-subnet-1a</code><br>• <code>public-subnet-1b</code></td>
+        <td rowspan="2">
+          เชื่อมต่อกับ Internet Gateway เพื่อเปิดรับคำขอ HTTPS จากภายนอกสู่ ALB และส่งออกสู่ผู้ใช้
+        </td>
+      </tr>
+      <tr>
+        <td><code>0.0.0.0/0</code></td>
+        <td><code>Internet Gateway</code> (<code>igw-xxxx</code>)</td>
+      </tr>
+      <tr>
+        <td rowspan="2"><b><code>rtb-private-app</code></b><br><span style="font-size:8pt;color:#64748B;">(App Tier Route Table)</span></td>
+        <td><code>10.0.0.0/16</code></td>
+        <td><code>local</code></td>
+        <td rowspan="2">• <code>private-app-subnet-2a</code><br>• <code>private-app-subnet-2b</code></td>
+        <td rowspan="2">
+          <b>Egress-Only:</b> ออกอินเทอร์เน็ตได้ทางเดียวผ่าน NAT Gateway เพื่อดึงอัปเดตระบบ หรือดึง Feed ผลบอลภายนอก <b>โลกภายนอกยิงเข้ามาไม่ได้</b>
+        </td>
+      </tr>
+      <tr>
+        <td><code>0.0.0.0/0</code></td>
+        <td><code>NAT Gateway</code> (<code>nat-xxxx</code>)</td>
+      </tr>
+      <tr>
+        <td><b><code>rtb-isolated-db</code></b><br><span style="font-size:8pt;color:#64748B;">(DB Tier Route Table)</span></td>
+        <td><code>10.0.0.0/16</code></td>
+        <td><code>local</code><br><span style="font-weight:700;color:var(--bad);">(ไม่มี 0.0.0.0/0 เด็ดขาด)</span></td>
+        <td>• <code>isolated-db-subnet-3a</code><br>• <code>isolated-db-subnet-3b</code></td>
+        <td>
+          <b>Air-Gapped Isolation:</b> ตัดขาดจากโลกภายนอก 100% สื่อสารได้เฉพาะภายใน VPC ช่วยป้องกัน Data Exfiltration โดยสิ้นเชิง
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warn-callout">
+    <b><i class="fa-solid fa-triangle-exclamation" style="color:var(--orange);"></i> ข้อกำหนดความปลอดภัยสำคัญของ rtb-isolated-db:</b><br>
+    การไม่ระบุเส้นทาง <code>0.0.0.0/0</code> ไปยัง Internet Gateway หรือ NAT Gateway ในตาราง <code>rtb-isolated-db</code> เป็นหลักประกันทางกายภาพในระดับเครือข่าย (Network Hardening) ว่าฐานข้อมูลจะไม่มีทางติดต่อหรือถูกติดต่อจากอินเทอร์เน็ตภายนอกได้ แม้ว่าจะมีข้อผิดพลาดในการตั้งค่าระดับแอปพลิเคชันก็ตาม
+  </div>
+</section>
+
+<!-- ========================================================================
+     PAGE 6: SECURITY GROUPS & ACCESS CONTROLS
+     ======================================================================== -->
+<section class="sheet page-break">
+  <h2 class="ch-header"><span class="ch-number">6</span>Security Groups Matrix แบบลูกโซ่ <span class="ch-en">Chained Security Groups</span></h2>
+  <p>ระบบใช้หลักการ <b>Chained Security Groups</b> โดยไม่อนุญาตให้อ้างอิง IP CIDR แบบกว้างภายใน VPC แต่จะผูกสิทธิ์ Inbound เข้ากับ <b>Security Group ID ของชั้นงานก่อนหน้าโดยตรง</b> ทำให้เกิดการป้องกันแบบ Microsegmentation:</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:13%;">Security Group</th>
+        <th style="width:13%;">Tier ชั้นงาน</th>
+        <th style="width:18%;">Inbound Rule (Port)</th>
+        <th style="width:20%;">Source (ต้นทางที่อนุญาต)</th>
+        <th style="width:18%;">Outbound Rule</th>
+        <th>เหตุผลด้านความปลอดภัย (Security Rationale)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sg-alb</code></td>
+        <td>Public ALB</td>
+        <td>TCP 443 (HTTPS)<br>TCP 80 (HTTP)</td>
+        <td><code>0.0.0.0/0</code> (Internet)</td>
+        <td>TCP 80 → <code>sg-web</code></td>
+        <td>เปิดรับทราฟฟิกจากผู้ใช้ทั่วไป โดยมี AWS WAF ช่วยสแกน Payload</td>
+      </tr>
+      <tr>
+        <td><code>sg-web</code></td>
+        <td>Web Tier (Nginx)</td>
+        <td>TCP 80 (HTTP)</td>
+        <td><b><code>sg-alb</code> เท่านั้น</b><br><span style="color:var(--bad);">(ห้าม 0.0.0.0/0)</span></td>
+        <td>TCP 5000 → <code>sg-int-alb</code><br>TCP 443 → Any (NAT/SSM)</td>
+        <td>ป้องกันไม่ให้บุคคลภายนอกบายพาส ALB ยิงตรงหา EC2 Nginx</td>
+      </tr>
+      <tr>
+        <td><code>sg-int-alb</code></td>
+        <td>Internal ALB</td>
+        <td>TCP 5000 (Custom)</td>
+        <td><b><code>sg-web</code> เท่านั้น</b></td>
+        <td>TCP 5000 → <code>sg-app</code></td>
+        <td>รับคำขอ Reverse Proxy จากเว็บเซิร์ฟเวอร์กระจายสู่ App Tier</td>
+      </tr>
+      <tr>
+        <td><code>sg-app</code></td>
+        <td>App Tier (Node.js)</td>
+        <td>TCP 5000 (Custom)</td>
+        <td><b><code>sg-int-alb</code> เท่านั้น</b></td>
+        <td>TCP 5432 → <code>sg-db</code><br>TCP 443 → Any (NAT/Feed)</td>
+        <td>App Engine ซ่อนตัวใน Private Subnet ตัดการเข้าถึงตรงจาก Web</td>
+      </tr>
+      <tr>
+        <td><code>sg-db</code></td>
+        <td>Database (RDS)</td>
+        <td>TCP 5432 (PostgreSQL)</td>
+        <td><b><code>sg-app</code> เท่านั้น</b></td>
+        <td><span class="pill pill-red">Deny All (ลบออกทั้งหมด)</span></td>
+        <td>ฐานข้อมูลเปิดรับเฉพาะ App Engine และไม่ส่งทราฟฟิกออกภายนอก</td>
+      </tr>
+      <tr>
+        <td><b>Admin Access</b></td>
+        <td>ทุก Tier</td>
+        <td><span class="pill pill-red">ปิด TCP 22 (SSH) 100%</span></td>
+        <td>ไม่อนุญาตไอพีใดๆ</td>
+        <td>HTTPS 443 ไปยัง AWS SSM</td>
+        <td><b>ตัดช่องโหว่ Brute-force 100%</b> โดยใช้ AWS Systems Manager แทน</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="ch-header" style="margin-top:6mm;"><span class="ch-number">7</span>โครงสร้างบทบาทผู้ใช้งาน (User Persona vs 3-Tier Access)</h2>
+  <p>เพื่อจำลองหลักการ <b>Separation of Duties (SoD)</b> ระบบได้แบ่ง User Persona ออกเป็น 3 บทบาทหลักที่สอดคล้องกับชั้นสถาปัตยกรรมของ AWS:</p>
+
+  <table class="data-table blue-header">
+    <thead>
+      <tr>
+        <th style="width:18%;">User Persona</th>
+        <th style="width:25%;">บทบาทและหน้าที่ในระบบ</th>
+        <th style="width:18%;">สิทธิ์ Web Tier (Public)</th>
+        <th style="width:18%;">สิทธิ์ App Tier (Private)</th>
+        <th>สิทธิ์ DB Tier (Isolated)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>1. ผู้ใช้ทั่วไป<br>(<code>player_alex</code>)</b></td>
+        <td>เข้าเล่นหน้าบ้าน ทายผลคู่แข่งขัน ตรวจสอบแต้ม และประวัติโพย</td>
+        <td><span class="pill pill-green">อนุญาต</span> (HTTPS: 443)</td>
+        <td><span class="pill pill-red">ห้ามเข้าถึงตรง</span> (ผ่าน API เท่านั้น)</td>
+        <td><span class="pill pill-red">ตัดขาด 100%</span> (ไม่มีสิทธิ์)</td>
+      </tr>
+      <tr>
+        <td><b>2. ผู้ดูแลระบบปฏิบัติการ<br>(<code>ops_manager</code>)</b></td>
+        <td>จัดการตารางแข่ง ปรับค่าน้ำ สรุปผลการแข่งขัน แจกแต้ม ดึง Feed นอก</td>
+        <td><span class="pill pill-green">อนุญาต</span></td>
+        <td><span class="pill pill-green">อนุญาต</span> (ผ่าน SSM &amp; Internal API)</td>
+        <td><span class="pill pill-red">ห้ามแก้ข้อมูลตรง</span> (ผ่าน Engine เท่านั้น)</td>
+      </tr>
+      <tr>
+        <td><b>3. ผู้ตรวจความปลอดภัย<br>(<code>sec_auditor</code>)</b></td>
+        <td>ตรวจสอบ Audit Logs, CloudTrail, Flow Logs, GuardDuty</td>
+        <td><span class="pill pill-blue">Read-Only Logs</span></td>
+        <td><span class="pill pill-blue">Read-Only Metrics</span></td>
+        <td><span class="pill pill-blue">Read-Only Audit Trail</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========================================================================
+     PAGE 7: MONITORING, BACKUP & EVIDENCE CHECKLIST
+     ======================================================================== -->
+<section class="sheet page-break">
+  <h2 class="ch-header"><span class="ch-number">8</span>การเฝ้าระวัง การสำรองข้อมูล และการกู้คืน <span class="ch-en">Monitoring &amp; DR</span></h2>
+  
+  <h3>8.1 การเฝ้าระวังและการบันทึก Log (Monitoring &amp; Observability)</h3>
+  <ul>
+    <li><b>AWS CloudTrail (<code>apex-mgmt-trail</code>):</b> บันทึกทุก API Call ระดับ Management Plane เปิดใช้งาน Log File Integrity Validation เพื่อป้องกันการปลอมแปลงบันทึกประวัติ</li>
+    <li><b>Amazon GuardDuty:</b> ระบบตรวจจับภัยคุกคามอัจฉริยะ วิเคราะห์ VPC Flow Logs, DNS Logs และ CloudTrail Events เพื่อตรวจจับพฤติกรรมผิดปกติ เช่น การขุดคริปโต หรือ Reconnaissance</li>
+    <li><b>Amazon CloudWatch Alarms:</b> ติดตั้ง 4 Alarms สำคัญ ได้แก่:
+      1) CPU Utilization &gt; 75% บน App ASG, 
+      2) Unhealthy Host Count &gt; 0 บน ALB, 
+      3) HTTP 5XX Rate &gt; 1% บน ALB, และ 
+      4) Free Storage Space &lt; 2 GB บน RDS ทั้งหมดส่งแจ้งเตือนผ่าน <b>Amazon SNS (<code>apex-security-alerts</code>)</b> ไปยังอีเมลทีมวิศวกร
+    </li>
+  </ul>
+
+  <h3>8.2 แผนการสำรองข้อมูลและการกู้คืน (Backup &amp; Disaster Recovery)</h3>
+  <ul>
+    <li><b>Amazon RDS Multi-AZ &amp; Automated Backup:</b> ข้อมูลถูกทำสำเนาแบบ Synchronous ข้ามไปยัง Availability Zone สำรอง (AZ-b) แบบ Real-time พร้อมเปิดระบบ Automated Backup ย้อนหลัง 7 วัน รองรับ <b>Point-in-Time Recovery (PITR)</b> ระดับวินาที</li>
+    <li><b>EC2 Golden AMI Snapshot:</b> เครื่องเซิร์ฟเวอร์ที่ติดตั้งซอฟต์แวร์และ Hardening เสร็จสมบูรณ์ถูกจัดทำเป็น Golden AMI (<code>apex-web-golden-ami-v1</code>) เพื่อให้ Auto Scaling Group สามารถสปินอัปเครื่องทดแทนได้ทันที</li>
+  </ul>
+
+  <h2 class="ch-header" style="margin-top:6mm;"><span class="ch-number">9</span>รายการหลักฐานภาพหน้าจอการติดตั้งจริง (Screenshots S01–S22)</h2>
+  <p>หลักฐานการติดตั้งจริงบน AWS Management Console ที่จัดเก็บผ่านหน้าเว็บคู่มือ <code>frontend/deployment-guide.html</code>:</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:12%;">รหัส</th>
+        <th style="width:30%;">หัวข้อหลักฐานการติดตั้ง</th>
+        <th>สิ่งที่ต้องเห็นในภาพหน้าจอเพื่อยืนยันความปลอดภัย</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><b>S01</b></td><td>Root Account MFA &amp; Budgets</td><td>สถานะ MFA "Enabled" บน Root Account และหน้า AWS Budget Alert</td></tr>
+      <tr><td><b>S02</b></td><td>VPC Creation</td><td>VPC <code>apex-predict-vpc</code> พร้อม IPv4 CIDR Block <code>10.0.0.0/16</code></td></tr>
+      <tr><td><b>S03</b></td><td>Subnets Allocation</td><td>Subnets 6 ตัว กระจาย 2 AZs (2 Public, 2 Private, 2 Isolated)</td></tr>
+      <tr><td><b>S04</b></td><td>Gateways Attachment</td><td>Internet Gateway (Attached) และ NAT Gateway สถานะ Available พร้อม Elastic IP</td></tr>
+      <tr><td><b>S05</b></td><td>Route Tables Configuration</td><td>Routes และ Subnet Associations ครบทั้ง 3 ตาราง (ยืนยัน DB ไม่มี 0.0.0.0/0)</td></tr>
+      <tr><td><b>S06</b></td><td>VPC Flow Logs</td><td>Flow Logs บน VPC ชี้ปลายทางเข้าสู่ CloudWatch Logs <code>/apex/vpc-flow-logs</code></td></tr>
+      <tr><td><b>S07</b></td><td>Chained Security Groups</td><td>Inbound Rules ของ <code>sg-alb</code>, <code>sg-web</code>, <code>sg-app</code>, <code>sg-db</code> (ยืนยันไม่มี Port 22)</td></tr>
+      <tr><td><b>S08</b></td><td>IAM Instance Profile</td><td>IAM Role <code>ApexEC2InstanceProfile</code> แนบนโยบาย SSM และ CloudWatch</td></tr>
+      <tr><td><b>S09</b></td><td>Secrets Manager</td><td>Secret <code>apex/prod/app</code> และ RDS Master Credentials ใน Secrets Manager</td></tr>
+      <tr><td><b>S10</b></td><td>RDS PostgreSQL Multi-AZ</td><td>RDS สถานะ Multi-AZ, Encryption KMS (Enabled), Public access = No, <code>sg-db</code></td></tr>
+      <tr><td><b>S11</b></td><td>Internal ALB</td><td>Load Balancer <code>apex-internal-alb</code> (Scheme: Internal, Listener: 5000)</td></tr>
+      <tr><td><b>S12</b></td><td>App ASG &amp; Target Group</td><td>Instance 2 ตัวใน Private Subnets และสถานะ Healthy บน Target Group</td></tr>
+      <tr><td><b>S13</b></td><td>Web ASG &amp; Target Group</td><td>Instance 2 ตัวใน Public Subnets และสถานะ Healthy บน Target Group</td></tr>
+      <tr><td><b>S14</b></td><td>ACM SSL/TLS Certificate</td><td>ใบรับรองสถานะ "Issued" รองรับ TLS 1.3</td></tr>
+      <tr><td><b>S15</b></td><td>Public ALB Listeners</td><td>Listener HTTP: 80 Redirect 301 สู่ HTTPS: 443 และกฎ TLS 1.3</td></tr>
+      <tr><td><b>S16</b></td><td>AWS WAF Web ACL</td><td>กฎ Managed Rules (Common, SQLi, Bad Inputs) และ Rate Limit ผูกกับ ALB</td></tr>
+      <tr><td><b>S17</b></td><td>Route 53 DNS Alias</td><td>Record ชี้ Alias ไปยัง DNS Name ของ <code>apex-public-alb</code></td></tr>
+      <tr><td><b>S18</b></td><td>CloudWatch &amp; SNS Alarms</td><td>Alarms สถานะ OK ผูกกับ SNS Topic <code>apex-security-alerts</code></td></tr>
+      <tr><td><b>S19</b></td><td>CloudTrail &amp; GuardDuty</td><td>CloudTrail Trail สถานะ Logging และ GuardDuty สถานะ Active</td></tr>
+      <tr><td><b>S20</b></td><td>SSM Session Manager</td><td>หน้าต่าง Terminal ของ EC2 App ผ่าน SSM (ยืนยันว่าไม่ต้องเปิดพอร์ต 22 SSH)</td></tr>
+      <tr><td><b>S21</b></td><td>End-to-End Application Test</td><td>หน้าเว็บ HTTPS มีแม่กุญแจเขียว เข้าสู่ระบบ ทายผล และตัดแต้มได้สมบูรณ์</td></tr>
+      <tr><td><b>S22</b></td><td>Backup Snapshot &amp; Golden AMI</td><td>Golden AMI (<code>apex-web-golden-ami-v1</code>) และ Manual RDS Snapshot</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+// Auto-save & Restore Form Inputs in localStorage
+const STORAGE_KEY = 'apex_report_gemini_form_v1';
+
+function saveFormData() {
+  const data = {};
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.getAttribute('data-key');
+    data[key] = el.innerText || '';
+  });
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Could not save to localStorage', e);
+  }
+}
+
+function restoreFormData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const key = el.getAttribute('data-key');
+      if (data[key] !== undefined) {
+        el.innerText = data[key];
+      }
+    });
+  } catch (e) {
+    console.warn('Could not restore from localStorage', e);
+  }
+}
+
+function resetForm() {
+  if (confirm('คุณต้องการล้างข้อมูลที่กรอกในฟอร์มทั้งหมดใช่หรือไม่?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    document.querySelectorAll('[data-key]').forEach(el => {
+      el.innerText = '';
+    });
+  }
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.hasAttribute('data-key')) {
+    saveFormData();
+  }
+});
+
+window.addEventListener('DOMContentLoaded', restoreFormData);
+</script>
+</body>
+</html>
+

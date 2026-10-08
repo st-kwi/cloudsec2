@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Security Architecture Report — Group 2 — Secure 3-Tier Web Application on AWS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   THEME: White / Blue / Orange  — Cloud Security Architecture Report
+   ===================================================================== */
+:root{
+  --navy:#0B2A5B; --blue:#1F6FEB; --blue-50:#EAF2FF; --blue-100:#D6E6FF;
+  --orange:#F28C28; --orange-50:#FFF4E8; --orange-100:#FFE3C4;
+  --ink:#1E293B; --muted:#64748B; --line:#DCE4F0; --bg:#F7F9FC;
+  --ok:#16A34A; --ok-50:#EAF7EE; --bad:#DC2626; --bad-50:#FDECEC;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+body{
+  margin:0; color:var(--ink); background:#E9EEF5;
+  font-family:'IBM Plex Sans Thai','Sarabun','Leelawadee UI',Tahoma,sans-serif;
+  font-size:10.5pt; line-height:1.6;
+}
+code,.mono{font-family:'JetBrains Mono',Consolas,monospace; font-size:.86em}
+code{background:var(--blue-50); color:var(--navy); padding:.05em .35em; border-radius:4px}
+
+/* ---------- Page model ---------- */
+@page{
+  size:A4; margin:18mm 16mm 18mm 16mm;
+  @top-left{content:"Cloud Security Architecture Report"; font-family:'IBM Plex Sans Thai',sans-serif; font-size:8pt; color:#64748B}
+  @top-right{content:"Group 2 · Secure 3-Tier Web Application on AWS"; font-family:'IBM Plex Sans Thai',sans-serif; font-size:8pt; color:#F28C28}
+  @bottom-left{content:"ระบบทายผลกีฬา (Cloud Sports Prediction & Betting Platform)"; font-family:'IBM Plex Sans Thai',sans-serif; font-size:8pt; color:#64748B}
+  @bottom-right{content:"หน้า " counter(page); font-family:'IBM Plex Sans Thai',sans-serif; font-size:8.5pt; color:#0B2A5B; font-weight:600}
+}
+@page cover{ margin:0; @top-left{content:none} @top-right{content:none} @bottom-left{content:none} @bottom-right{content:none} }
+@page wide{ size:A4 landscape; margin:12mm 12mm 14mm 12mm; }
+
+.sheet{background:#fff; width:210mm; margin:10mm auto; padding:18mm 16mm; box-shadow:0 4px 24px rgba(11,42,91,.12)}
+.sheet.wide-sheet{width:297mm}
+@media print{
+  body{background:#fff}
+  .sheet{margin:0; padding:0; box-shadow:none; width:auto}
+  .sheet.wide-sheet{width:auto}
+  .no-print{display:none !important}
+}
+.page-break{break-before:page}
+.avoid{break-inside:avoid}
+
+/* ---------- Cover ---------- */
+.cover{page:cover; width:210mm; height:297mm; margin:10mm auto; position:relative; overflow:hidden; background:#fff; box-shadow:0 4px 24px rgba(11,42,91,.12); display:flex; flex-direction:column}
+@media print{ .cover{margin:0; box-shadow:none} }
+.cover-top{background:linear-gradient(135deg,#0B2A5B 0%,#123E82 55%,#1F6FEB 100%); color:#fff; padding:20mm 18mm 14mm; position:relative}
+.cover-top::after{content:""; position:absolute; left:0; right:0; bottom:-4mm; height:4mm; background:linear-gradient(90deg,var(--orange),#FFB547)}
+.cover-badges{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12mm}
+.badge{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:8.5pt; font-weight:600; letter-spacing:.2px}
+.badge.ghost{border:1px solid rgba(255,255,255,.45); color:#fff}
+.badge.orange{background:var(--orange); color:#fff}
+.cover-kicker{font-size:10pt; letter-spacing:2.5px; text-transform:uppercase; color:#FFD3A3; font-weight:600}
+.cover h1{font-size:25pt; line-height:1.25; margin:3mm 0 2mm; font-weight:700}
+.cover h1 .en{display:block; font-size:16pt; font-weight:500; color:#CFE0FF; margin-top:1.5mm}
+.cover-sub{font-size:12pt; color:#E3ECFF; margin-top:5mm; border-left:3px solid var(--orange); padding-left:10px}
+.cover-body{padding:12mm 18mm 0; flex:1}
+.cover-meta{display:grid; grid-template-columns:1fr 1fr; gap:3mm 8mm; margin-bottom:7mm}
+.field{display:flex; align-items:flex-end; gap:6px; font-size:10pt}
+.field label{color:var(--navy); font-weight:600; white-space:nowrap}
+.fill{flex:1; min-height:7mm; border-bottom:1.2px dotted #94A3B8; padding:0 4px; color:var(--ink); outline:none}
+.fill:focus{background:var(--orange-50)}
+.group-title{display:flex; align-items:center; justify-content:space-between; margin:2mm 0 3mm}
+.group-title h3{margin:0; font-size:13pt; color:var(--navy)}
+.group-chip{background:var(--orange); color:#fff; font-weight:700; padding:3px 14px; border-radius:6px; font-size:11pt}
+table.members{width:100%; border-collapse:collapse; font-size:9.5pt}
+table.members th{background:var(--navy); color:#fff; font-weight:600; padding:6px 8px; text-align:left}
+table.members th:first-child{border-top-left-radius:6px}
+table.members th:last-child{border-top-right-radius:6px}
+table.members td{border-bottom:1px solid var(--line); height:12mm; padding:2px 8px; vertical-align:bottom}
+table.members td.no{width:11mm; text-align:center; vertical-align:middle; font-weight:700; color:var(--blue)}
+table.members td[contenteditable]{outline:none}
+table.members td[contenteditable]:focus{background:var(--orange-50)}
+table.members tr:nth-child(even) td{background:#FAFCFF}
+.cover-foot{padding:6mm 18mm 10mm; display:flex; justify-content:space-between; align-items:flex-end; font-size:8.5pt; color:var(--muted)}
+.cover-foot .stack{display:flex; gap:5px}
+.tier-dot{width:9mm; height:2.2mm; border-radius:2px}
+
+/* ---------- Typography ---------- */
+h2.chapter{font-size:17pt; color:var(--navy); margin:0 0 4mm; padding-bottom:2.5mm; border-bottom:2.5px solid var(--blue); display:flex; align-items:baseline; gap:10px; break-after:avoid}
+h2.chapter .num{background:var(--orange); color:#fff; border-radius:7px; font-size:12pt; padding:1px 10px; transform:translateY(-2px)}
+h2.chapter .en{font-size:10.5pt; color:var(--muted); font-weight:500; margin-left:auto}
+h3{font-size:12.5pt; color:var(--blue); margin:6mm 0 2.5mm; break-after:avoid}
+h4{font-size:10.8pt; color:var(--navy); margin:4mm 0 1.5mm; break-after:avoid}
+p{margin:0 0 2.6mm; text-align:justify}
+ul,ol{margin:0 0 3mm; padding-left:6mm}
+li{margin-bottom:1mm}
+.lead{font-size:11pt; color:#334155}
+.muted{color:var(--muted)}
+.small{font-size:8.8pt}
+.caption{font-size:8.8pt; color:var(--muted); text-align:center; margin-top:2mm}
+.caption b{color:var(--navy)}
+
+/* ---------- Tables ---------- */
+table.tbl{width:100%; border-collapse:separate; border-spacing:0; font-size:9pt; margin:2mm 0 4mm; border:1px solid var(--line); border-radius:8px; overflow:hidden}
+table.tbl thead th{background:var(--navy); color:#fff; text-align:left; font-weight:600; padding:6px 7px; vertical-align:bottom}
+table.tbl tbody td{padding:5px 7px; border-top:1px solid var(--line); vertical-align:top}
+table.tbl tbody tr:nth-child(even) td{background:#F8FAFD}
+table.tbl tr{break-inside:avoid}
+table.tbl.blue thead th{background:var(--blue)}
+table.tbl.orange thead th{background:var(--orange)}
+table.tbl td.c, table.tbl th.c{text-align:center}
+table.tbl .grp td{background:var(--blue-50) !important; color:var(--navy); font-weight:700}
+.y{color:var(--ok); font-weight:700}
+.n{color:var(--bad); font-weight:700}
+.pill{display:inline-block; padding:1px 7px; border-radius:99px; font-size:8pt; font-weight:600; white-space:nowrap}
+.pill.pub{background:var(--orange-50); color:#B45309; border:1px solid var(--orange-100)}
+.pill.app{background:var(--blue-50); color:var(--blue); border:1px solid var(--blue-100)}
+.pill.db{background:#EEF1F8; color:var(--navy); border:1px solid #CBD3E6}
+.pill.ok{background:var(--ok-50); color:var(--ok)}
+.pill.bad{background:var(--bad-50); color:var(--bad)}
+.pill.ev{background:var(--orange); color:#fff}
+td.cell-y{background:var(--ok-50) !important; color:var(--ok); font-weight:700; text-align:center}
+td.cell-n{background:#FBF3F3 !important; color:#B91C1C; text-align:center}
+td.cell-s{background:#F1F5F9 !important; color:#94A3B8; text-align:center}
+
+/* ---------- Callouts & cards ---------- */
+.callout{border-radius:8px; padding:3mm 4mm; margin:3mm 0 4mm; font-size:9.6pt; break-inside:avoid}
+.callout.info{background:var(--blue-50); border-left:4px solid var(--blue)}
+.callout.warn{background:var(--orange-50); border-left:4px solid var(--orange)}
+.callout b.t{display:block; color:var(--navy); margin-bottom:1mm}
+.metrics{display:grid; grid-template-columns:repeat(6,1fr); gap:2.5mm; margin:4mm 0 5mm}
+.metric{border:1px solid var(--line); border-radius:8px; padding:3mm 2mm; text-align:center; background:#fff}
+.metric .v{font-size:19pt; font-weight:700; color:var(--blue); line-height:1.1}
+.metric:nth-child(even) .v{color:var(--orange)}
+.metric .k{font-size:8pt; color:var(--muted); line-height:1.3; margin-top:1mm}
+.principle{border:1px solid var(--line); border-radius:10px; margin:0 0 4mm; overflow:hidden; break-inside:avoid}
+.principle-head{display:flex; align-items:center; gap:10px; padding:2.6mm 4mm; background:linear-gradient(90deg,var(--blue-50),#fff)}
+.principle-head .ic{width:9mm; height:9mm; border-radius:8px; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11pt; flex:none}
+.principle-head h4{margin:0; font-size:11.5pt}
+.principle-head .en{color:var(--muted); font-size:9pt; font-weight:500}
+.principle-body{display:grid; grid-template-columns:1fr 1.35fr; gap:0}
+.principle-body > div{padding:3mm 4mm; font-size:9.4pt}
+.principle-body .concept{border-right:1px dashed var(--line)}
+.principle-body .lbl{display:inline-block; font-size:8pt; font-weight:700; letter-spacing:.4px; text-transform:uppercase; margin-bottom:1mm; padding:1px 7px; border-radius:4px}
+.principle-body .concept .lbl{background:var(--blue-50); color:var(--blue)}
+.principle-body .impl .lbl{background:var(--orange-50); color:#C2410C}
+.principle-body ul{padding-left:4.5mm; margin:0}
+.principle-foot{border-top:1px solid var(--line); padding:1.6mm 4mm; font-size:8.5pt; color:var(--muted); background:#FBFCFE}
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:5mm}
+.toc{columns:1; font-size:10.5pt}
+.toc-item{display:flex; gap:8px; align-items:baseline; padding:1.6mm 0; border-bottom:1px dotted #CBD5E1}
+.toc-item .n{color:#fff; background:var(--blue); border-radius:5px; padding:0 7px; font-size:9pt; min-width:9mm; text-align:center}
+.toc-item.sub{padding-left:12mm; font-size:9.6pt; color:#475569; border-bottom:none; padding-top:.6mm; padding-bottom:.6mm}
+.toc-item .en{margin-left:auto; color:var(--muted); font-size:9pt}
+
+/* ---------- Diagram ---------- */
+.diagram-wrap{border:1px solid var(--line); border-radius:10px; padding:3mm; background:#fff}
+.diagram-wrap svg{width:100%; height:auto; display:block}
+svg text{font-family:'IBM Plex Sans Thai','Sarabun','Leelawadee UI',Tahoma,sans-serif}
+
+/* SG chain */
+.chain{display:flex; align-items:stretch; gap:0; margin:3mm 0 4mm}
+.chain .node{flex:1; border:1.5px solid var(--line); border-radius:8px; padding:2.4mm 2mm; text-align:center; background:#fff; font-size:8.6pt}
+.chain .node b{display:block; font-size:9.5pt; color:var(--navy)}
+.chain .node.inet{background:var(--navy); border-color:var(--navy); color:#fff}
+.chain .node.inet b{color:#fff}
+.chain .node.pub{border-color:var(--orange); background:var(--orange-50)}
+.chain .node.app{border-color:var(--blue); background:var(--blue-50)}
+.chain .node.db{border-color:var(--navy); background:#EEF1F8}
+.chain .arrow{flex:none; width:15mm; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:7.6pt; color:var(--orange); font-weight:700}
+.chain .arrow::after{content:"➜"; font-size:14pt; color:var(--blue); line-height:1}
+
+/* Flow steps */
+.flow{counter-reset:f; margin:2mm 0 4mm; padding:0; list-style:none}
+.flow li{counter-increment:f; position:relative; padding:2mm 3mm 2mm 12mm; margin-bottom:1.6mm; border:1px solid var(--line); border-radius:8px; background:#fff; break-inside:avoid; font-size:9.4pt}
+.flow li::before{content:counter(f); position:absolute; left:3mm; top:2.1mm; width:6.5mm; height:6.5mm; border-radius:50%; background:var(--orange); color:#fff; font-weight:700; font-size:9pt; display:flex; align-items:center; justify-content:center}
+.flow li b{color:var(--navy)}
+
+.signoff{display:grid; grid-template-columns:repeat(3,1fr); gap:6mm; margin-top:10mm}
+.signoff .box{text-align:center; font-size:9pt}
+.signoff .line{border-bottom:1px dotted #64748B; height:14mm; margin-bottom:1.5mm}
+
+.toolbar{position:fixed; right:16px; top:16px; z-index:10; display:flex; gap:8px}
+.toolbar button{font-family:inherit; border:none; border-radius:8px; padding:9px 14px; font-weight:600; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.toolbar .p{background:var(--blue); color:#fff}
+.toolbar .s{background:#fff; color:var(--navy)}
+.edit-hint{position:fixed; left:16px; bottom:16px; max-width:360px; background:#fff; border-left:4px solid var(--orange); padding:10px 14px; border-radius:8px; font-size:9.5pt; box-shadow:0 2px 10px rgba(0,0,0,.12)}
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <button class="s" onclick="clearFill()">ล้างช่องกรอก</button>
+  <button class="p" onclick="window.print()">พิมพ์ / บันทึกเป็น PDF</button>
+</div>
+<div class="edit-hint no-print">
+  <b>✏️ กรอกข้อมูลได้ทันที:</b> คลิกที่ช่องเส้นประบนหน้าปก (ชื่อสมาชิก รหัสนักศึกษา รายวิชา ฯลฯ) แล้วพิมพ์ได้เลย ระบบจำค่าไว้ในเบราว์เซอร์ จากนั้นกด <b>พิมพ์ / บันทึกเป็น PDF</b> (เลือก Save as PDF และเปิด Background graphics)
+</div>
+
+<!-- =========================================================
+     COVER PAGE
+     ========================================================= -->
+<section class="cover">
+  <div class="cover-top">
+    <div class="cover-badges">
+      <span class="badge orange">TERM PROJECT</span>
+      <span class="badge ghost">Cloud Security</span>
+      <span class="badge ghost">AWS · ap-southeast-1</span>
+      <span class="badge ghost">Version 1.0</span>
+    </div>
+    <div class="cover-kicker">Cloud Security Architecture Report</div>
+    <h1>ระบบทายผลกีฬา
+      <span class="en">Cloud Sports Prediction &amp; Betting Platform</span>
+    </h1>
+    <div class="cover-sub">
+      <b>Secure 3-Tier Web Application on AWS</b><br>
+      เอกสารการออกแบบสถาปัตยกรรมคลาวด์ ความปลอดภัย และโครงสร้างระบบ<br>
+      <span style="font-size:10pt;color:#CFE0FF">หลักการและแนวคิดการออกแบบ · การดำเนินการตามแนวคิด · หลักฐานการติดตั้งจริง</span>
+    </div>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-meta">
+      <div class="field"><label>รายวิชา</label><span class="fill" contenteditable="true" data-key="course"></span></div>
+      <div class="field"><label>รหัสวิชา</label><span class="fill" contenteditable="true" data-key="courseCode"></span></div>
+      <div class="field"><label>อาจารย์ผู้สอน</label><span class="fill" contenteditable="true" data-key="instructor"></span></div>
+      <div class="field"><label>ภาคเรียน / ปีการศึกษา</label><span class="fill" contenteditable="true" data-key="semester"></span></div>
+      <div class="field"><label>คณะ / สาขาวิชา</label><span class="fill" contenteditable="true" data-key="faculty"></span></div>
+      <div class="field"><label>วันที่ส่งรายงาน</label><span class="fill" contenteditable="true" data-key="date"></span></div>
+    </div>
+
+    <div class="group-title">
+      <h3>รายชื่อสมาชิกกลุ่ม (Group Members)</h3>
+      <span class="group-chip">GROUP 2</span>
+    </div>
+    <table class="members">
+      <thead><tr><th style="width:11mm;text-align:center">ลำดับ</th><th>ชื่อ - นามสกุล</th><th style="width:80mm">รหัสนักศึกษา</th></tr></thead>
+      <tbody>
+        <tr><td class="no">1</td><td contenteditable="true" data-key="m1n"></td><td contenteditable="true" data-key="m1i"></td></tr>
+        <tr><td class="no">2</td><td contenteditable="true" data-key="m2n"></td><td contenteditable="true" data-key="m2i"></td></tr>
+        <tr><td class="no">3</td><td contenteditable="true" data-key="m3n"></td><td contenteditable="true" data-key="m3i"></td></tr>
+        <tr><td class="no">4</td><td contenteditable="true" data-key="m4n"></td><td contenteditable="true" data-key="m4i"></td></tr>
+        <tr><td class="no">5</td><td contenteditable="true" data-key="m5n"></td><td contenteditable="true" data-key="m5i"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cover-foot">
+    <div>
+      <div style="font-weight:600;color:#0B2A5B;font-size:9.5pt">Secure 3-Tier · Multi-AZ · Zero Public SSH · Encrypted End-to-Edge</div>
+      <div>Web Tier (Public) · App Tier (Private) · DB Tier (Isolated) — VPC 10.0.0.0/16</div>
+    </div>
+    <div class="stack">
+      <span class="tier-dot" style="background:#F28C28"></span>
+      <span class="tier-dot" style="background:#1F6FEB"></span>
+      <span class="tier-dot" style="background:#0B2A5B"></span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     DOCUMENT CONTROL + TOC
+     ========================================================= -->
+<section class="sheet">
+  <h2 class="chapter">สารบัญ <span class="en">Table of Contents</span></h2>
+  <div class="toc">
+    <div class="toc-item"><span class="n">1</span>บทสรุปผู้บริหาร<span class="en">Executive Summary</span></div>
+    <div class="toc-item"><span class="n">2</span>วัตถุประสงค์ ขอบเขต และความต้องการของระบบ<span class="en">Objectives, Scope &amp; Requirements</span></div>
+    <div class="toc-item"><span class="n">3</span>หลักการและแนวคิดการออกแบบ และการดำเนินการ<span class="en">Design Principles → Implementation</span></div>
+    <div class="toc-item"><span class="n">4</span>แผนผังสถาปัตยกรรมระบบ<span class="en">Architecture Diagram &amp; Components</span></div>
+    <div class="toc-item"><span class="n">5</span>การออกแบบเครือข่ายและแผนผัง IP<span class="en">VPC, Subnets &amp; IP Plan</span></div>
+    <div class="toc-item"><span class="n">6</span>ตารางเส้นทาง (Routing Tables) และการเข้าถึงข้ามชั้น<span class="en">Route Tables &amp; Reachability</span></div>
+    <div class="toc-item"><span class="n">7</span>Security Groups แบบลูกโซ่ และกลยุทธ์พอร์ต<span class="en">Chained Security Groups</span></div>
+    <div class="toc-item"><span class="n">8</span>เส้นทางการไหลของคำขอ<span class="en">Request Lifecycle</span></div>
+    <div class="toc-item"><span class="n">9</span>การจัดการตัวตนและสิทธิ์การเข้าถึง<span class="en">IAM, Secrets &amp; User Personas</span></div>
+    <div class="toc-item"><span class="n">10</span>การปกป้องข้อมูลและการเข้ารหัส<span class="en">Data Protection &amp; Encryption</span></div>
+    <div class="toc-item"><span class="n">11</span>ความปลอดภัยระดับแอปพลิเคชัน<span class="en">Application Security (OWASP Top 10)</span></div>
+    <div class="toc-item"><span class="n">12</span>การเฝ้าระวัง บันทึก Log และแจ้งเตือน<span class="en">Monitoring, Logging &amp; Alerting</span></div>
+    <div class="toc-item"><span class="n">13</span>การสำรองข้อมูลและการกู้คืนระบบ<span class="en">Backup &amp; Disaster Recovery</span></div>
+    <div class="toc-item"><span class="n">14</span>การวิเคราะห์ภัยคุกคาม<span class="en">Threat Model (STRIDE)</span></div>
+    <div class="toc-item"><span class="n">15</span>ความสอดคล้องกับกรอบมาตรฐานความปลอดภัย<span class="en">Framework Compliance Mapping</span></div>
+    <div class="toc-item"><span class="n">16</span>ประมาณการค่าใช้จ่าย<span class="en">Cost Estimation</span></div>
+    <div class="toc-item"><span class="n">17</span>ข้อจำกัดและแนวทางพัฒนาต่อ<span class="en">Limitations &amp; Future Work</span></div>
+    <div class="toc-item"><span class="n">18</span>สรุปผลตามเกณฑ์การประเมิน และบทสรุป<span class="en">Rubric Alignment &amp; Conclusion</span></div>
+    <div class="toc-item"><span class="n">ก</span>ภาคผนวก ก — รายการหลักฐานภาพหน้าจอ S01–S22<span class="en">Evidence Checklist</span></div>
+    <div class="toc-item"><span class="n">ข</span>ภาคผนวก ข — อภิธานศัพท์<span class="en">Glossary</span></div>
+  </div>
+
+  <h3 style="margin-top:9mm">ข้อมูลควบคุมเอกสาร (Document Control)</h3>
+  <table class="tbl">
+    <thead><tr><th style="width:22%">รายการ</th><th>รายละเอียด</th></tr></thead>
+    <tbody>
+      <tr><td>ชื่อเอกสาร</td><td>Cloud Security Architecture Report — Secure 3-Tier Web Application on AWS</td></tr>
+      <tr><td>ระบบ</td><td>ระบบทายผลกีฬา APEX PREDICT (Cloud Sports Prediction &amp; Betting Platform)</td></tr>
+      <tr><td>จัดทำโดย</td><td>Group 2 (สมาชิก 5 คน — ดูรายชื่อที่หน้าปก)</td></tr>
+      <tr><td>เวอร์ชัน / สถานะ</td><td>1.0 — ฉบับส่งรายงาน Term Project</td></tr>
+      <tr><td>Region</td><td>Asia Pacific (Singapore) <code>ap-southeast-1</code> — Availability Zones <code>ap-southeast-1a</code>, <code>ap-southeast-1b</code></td></tr>
+      <tr><td>เอกสารที่เกี่ยวข้อง</td><td><code>ARCHITECTURE_AND_SECURITY.md</code>, <code>AWS_CONSOLE_DEPLOYMENT_GUIDE.md</code>, หน้าเว็บคู่มือติดตั้ง <code>frontend/deployment-guide.html</code> (ใช้เก็บภาพหน้าจอ S01–S22 และ export รายงานหลักฐาน)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- =========================================================
+     1. EXECUTIVE SUMMARY  +  2. OBJECTIVES
+     ========================================================= -->
+<section class="sheet page-break">
+  <h2 class="chapter"><span class="num">1</span>บทสรุปผู้บริหาร <span class="en">Executive Summary</span></h2>
+  <p class="lead">โครงการนี้ออกแบบและติดตั้ง <b>ระบบทายผลกีฬา (APEX PREDICT)</b> บน <b>Amazon Web Services (AWS)</b> ด้วยสถาปัตยกรรม <b>Secure 3-Tier Web Application</b> แบ่งระบบออกเป็น Web Tier, App Tier และ DB Tier อย่างเด็ดขาด กระจายตัวข้าม <b>2 Availability Zones</b> เพื่อให้ระบบพร้อมใช้งานสูง (High Availability) และยึดหลัก <b>Cloud Security Best Practices</b> ตามแนวทาง AWS Well-Architected Framework (Security Pillar), CIS AWS Foundations Benchmark, OWASP Top 10 และ NIST Cybersecurity Framework</p>
+  <p>แนวคิดหลักของการออกแบบคือ <b>“ไม่ไว้ใจชั้นใดโดยปริยาย และป้องกันหลายชั้นซ้อนกัน”</b> (Zero Trust + Defense-in-Depth) โดยคำขอจากผู้ใช้ต้องผ่านการกรองที่ AWS WAF, เข้ารหัสด้วย TLS 1.3 ที่ Application Load Balancer แล้วจึงไหลผ่าน Security Groups แบบลูกโซ่ (อ้างอิงกันด้วย SG ID ไม่ใช่ช่วง IP) ไปจนถึงฐานข้อมูลที่อยู่ใน Subnet ซึ่งไม่มีเส้นทางออกอินเทอร์เน็ตเลย ผู้ดูแลระบบบริหารเครื่องผ่าน AWS Systems Manager โดย <b>ไม่เปิดพอร์ต SSH 22 ในทุก Security Group</b> ข้อมูลถูกเข้ารหัสทั้งระหว่างส่งและขณะจัดเก็บด้วย AWS KMS และทุกกิจกรรมถูกบันทึกด้วย CloudTrail, VPC Flow Logs และเฝ้าระวังภัยคุกคามด้วย GuardDuty</p>
+
+  <div class="metrics">
+    <div class="metric"><div class="v">3</div><div class="k">Tiers<br>Web · App · DB</div></div>
+    <div class="metric"><div class="v">2</div><div class="k">Availability Zones<br>Multi-AZ</div></div>
+    <div class="metric"><div class="v">6</div><div class="k">Subnets<br>2 Public · 2 Private · 2 Isolated</div></div>
+    <div class="metric"><div class="v">3</div><div class="k">Route Tables<br>IGW · NAT · Local only</div></div>
+    <div class="metric"><div class="v">5</div><div class="k">Chained<br>Security Groups</div></div>
+    <div class="metric"><div class="v">0</div><div class="k">Open SSH Ports<br>(ใช้ SSM แทน)</div></div>
+  </div>
+
+  <h4>ผลลัพธ์สำคัญ (Key Outcomes)</h4>
+  <table class="tbl">
+    <thead><tr><th style="width:28%">ด้าน</th><th>สิ่งที่ได้ดำเนินการ</th></tr></thead>
+    <tbody>
+      <tr><td><b>การแบ่งชั้นเครือข่าย</b></td><td>VPC <code>10.0.0.0/16</code> แบ่ง 6 Subnets ใน 3 ชั้น ใช้ Route Table แยก 3 ชุด — DB Tier มีเพียงเส้นทาง <code>local</code> (ไม่มี <code>0.0.0.0/0</code>)</td></tr>
+      <tr><td><b>การควบคุมทราฟฟิก</b></td><td>Security Groups 5 ชุดอ้างอิงแบบลูกโซ่ <code>sg-alb → sg-web → sg-int-alb → sg-app → sg-db</code> เปิดเฉพาะพอร์ตที่จำเป็น (443/80 → 80 → 5000 → 5432)</td></tr>
+      <tr><td><b>การป้องกันชั้นขอบ</b></td><td>AWS WAF (Managed Rules: Common, SQLi, Known Bad Inputs, IP Reputation + Rate-based 1,000 req/5 นาที) และ AWS Shield Standard</td></tr>
+      <tr><td><b>การเข้ารหัส</b></td><td>TLS 1.3 (<code>ELBSecurityPolicy-TLS13-1-2-2021-06</code>) + HTTP→HTTPS 301, RDS/EBS เข้ารหัส AES-256 ด้วย KMS, ความลับเก็บใน Secrets Manager</td></tr>
+      <tr><td><b>ความพร้อมใช้งาน</b></td><td>ALB Multi-AZ, Auto Scaling Group (min 2 / max 6) ทั้ง Web และ App, RDS PostgreSQL Multi-AZ (Synchronous Standby), Backup 7 วัน + PITR</td></tr>
+      <tr><td><b>การตรวจสอบย้อนกลับ</b></td><td>CloudTrail (Multi-Region + Log file validation), VPC Flow Logs, GuardDuty, CloudWatch Alarms → SNS Email</td></tr>
+      <tr><td><b>ความปลอดภัยแอปพลิเคชัน</b></td><td>JWT (HMAC-SHA256, หมดอายุ 8 ชม.), RBAC 3 บทบาท, Rate Limiter 3 ระดับ, Wallet Lock ป้องกัน Double Spending, Nginx Security Headers</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="chapter page-break"><span class="num">2</span>วัตถุประสงค์ ขอบเขต และความต้องการ <span class="en">Objectives &amp; Scope</span></h2>
+  <h3>2.1 วัตถุประสงค์ (Objectives)</h3>
+  <ol>
+    <li>ออกแบบสถาปัตยกรรม 3-Tier บน AWS ที่แยกส่วนนำเสนอ (Presentation) ตรรกะธุรกิจ (Business Logic) และข้อมูล (Data) ออกจากกันทั้งในระดับเครือข่ายและสิทธิ์การเข้าถึง</li>
+    <li>ประยุกต์ใช้หลักการความปลอดภัยคลาวด์ (Defense-in-Depth, Least Privilege, Zero Trust, Encryption, Observability) อย่างเป็นรูปธรรมในทุกชั้น</li>
+    <li>ทำให้ระบบรองรับความล้มเหลวระดับ Instance และระดับ Availability Zone ได้โดยอัตโนมัติ</li>
+    <li>จัดทำคู่มือการติดตั้งทีละขั้นตอนบน AWS Management Console พร้อมเก็บหลักฐานภาพหน้าจอ 22 จุด (S01–S22) เพื่อพิสูจน์ว่าการออกแบบถูกนำไปใช้จริง</li>
+  </ol>
+  <h3>2.2 ขอบเขตของระบบ (Scope)</h3>
+  <div class="two-col">
+    <div class="callout info" style="margin:0"><b class="t">อยู่ในขอบเขต (In Scope)</b>
+      <ul style="margin:0">
+        <li>VPC, Subnets, IGW, NAT Gateway, Route Tables, VPC Flow Logs</li>
+        <li>Public ALB + Internal ALB, Auto Scaling (Web/App), EC2 Launch Templates</li>
+        <li>Amazon RDS PostgreSQL Multi-AZ, KMS, Secrets Manager</li>
+        <li>WAF, ACM, Route 53, IAM, SSM, CloudTrail, GuardDuty, CloudWatch, SNS</li>
+        <li>แอปพลิเคชันทายผลกีฬา (Frontend Nginx + Node.js API)</li>
+      </ul>
+    </div>
+    <div class="callout warn" style="margin:0"><b class="t">นอกขอบเขต (Out of Scope)</b>
+      <ul style="margin:0">
+        <li>การทำ Disaster Recovery ข้าม Region</li>
+        <li>ระบบชำระเงินจริง (ใช้ระบบแต้มสมมติ)</li>
+        <li>Infrastructure as Code / CI/CD Pipeline (เสนอเป็นงานต่อยอด)</li>
+        <li>CloudFront CDN และ AWS Shield Advanced</li>
+      </ul>
+    </div>
+  </div>
+  <h3>2.3 ความต้องการของระบบ (Requirements)</h3>
+  <table class="tbl blue">
+    <thead><tr><th style="width:9%">รหัส</th><th style="width:16%">ประเภท</th><th>ความต้องการ</th><th style="width:28%">ตอบสนองโดย</th></tr></thead>
+    <tbody>
+      <tr><td>FR-1</td><td>Functional</td><td>ผู้ใช้สมัคร/เข้าสู่ระบบ ดูตารางแข่ง ทายผลแบบเดี่ยวและแบบชุด (Parlay)</td><td>Node.js API <code>/api/auth</code>, <code>/api/bets</code></td></tr>
+      <tr><td>FR-2</td><td>Functional</td><td>ผู้ดูแล (Ops) จัดการคู่แข่ง อัตราต่อรอง และสรุปผลแจกแต้ม</td><td><code>/api/matches</code>, <code>/api/settlement</code> + RBAC</td></tr>
+      <tr><td>SR-1</td><td>Security</td><td>ฐานข้อมูลต้องไม่สามารถเข้าถึงได้จากอินเทอร์เน็ต</td><td>Isolated Subnet + <code>rtb-isolated-db</code> + <code>sg-db</code></td></tr>
+      <tr><td>SR-2</td><td>Security</td><td>ข้อมูลต้องเข้ารหัสทั้ง In-Transit และ At-Rest</td><td>ACM TLS 1.3, KMS AES-256</td></tr>
+      <tr><td>SR-3</td><td>Security</td><td>ห้ามมีพอร์ตบริหารจัดการเปิดสู่สาธารณะ</td><td>ไม่มี TCP 22 / ใช้ SSM Session Manager</td></tr>
+      <tr><td>SR-4</td><td>Security</td><td>ป้องกัน SQLi / XSS / Brute-force / Flood</td><td>WAF Managed Rules + Rate Limit (Edge &amp; App)</td></tr>
+      <tr><td>SR-5</td><td>Security</td><td>ทุกการเปลี่ยนแปลงและทราฟฟิกต้องตรวจสอบย้อนหลังได้</td><td>CloudTrail, VPC Flow Logs, CloudWatch</td></tr>
+      <tr><td>NFR-1</td><td>Availability</td><td>ทนต่อการล่มของ 1 AZ ได้</td><td>Multi-AZ ALB / ASG / RDS</td></tr>
+      <tr><td>NFR-2</td><td>Scalability</td><td>ขยายตัวอัตโนมัติเมื่อมีผู้ใช้มาก (เช่น ช่วงบิ๊กแมตช์)</td><td>ASG Target Tracking CPU 75%</td></tr>
+    </tbody>
+  </table>
+</section>

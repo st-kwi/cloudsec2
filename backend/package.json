@@ -1,0 +1,20 @@
+{
+  "name": "apex-predict-backend",
+  "version": "1.0.0",
+  "description": "Secure 3-Tier Sports Prediction & Betting API on AWS Cloud",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "keywords": ["aws", "3-tier", "sports-betting", "cloud-security"],
+  "author": "CloudSec Term Project Team",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "express-rate-limit": "^7.2.0"
+  }
+}

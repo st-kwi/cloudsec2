@@ -1,0 +1,10 @@
+services:
+  apexpredictbackend:
+    image: apexpredictbackend
+    build:
+      context: backend
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 5000:5000
