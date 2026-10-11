@@ -1,0 +1,23 @@
+# /etc/systemd/system/dns69-web.service — web tier
+[Unit]
+Description=DNS69 Web (web tier)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=dns69
+WorkingDirectory=/opt/dns69/web/.next/standalone
+EnvironmentFile=/etc/dns69/web.env
+# ดึง JWT_SECRET จาก Secrets Manager ทุกครั้งที่ start — ไม่เขียนลงดิสก์ถาวร
+ExecStartPre=+/opt/dns69/deploy/fetch-web-secret.sh
+EnvironmentFile=-/run/dns69-web-secret.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

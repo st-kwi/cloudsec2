@@ -1,0 +1,21 @@
+# /etc/systemd/system/dns69-api.service — app tier
+[Unit]
+Description=DNS69 API (app tier)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=dns69
+WorkingDirectory=/opt/dns69/api
+EnvironmentFile=/etc/dns69/api.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=always
+RestartSec=3
+# hardening: โปรเซสนี้เขียนดิสก์ไม่ได้ ยกระดับสิทธิ์ไม่ได้
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
