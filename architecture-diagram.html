@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แผนผังสถาปัตยกรรมระบบจริงฉบับสมบูรณ์ (As-Built Complete Architecture) — Group 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0B2A5B;
+    --blue: #1F6FEB;
+    --orange: #F28C28;
+    --bg: #0F172A;
+    --card: #1E293B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans Thai', -apple-system, sans-serif;
+    background: var(--bg);
+    color: #F8FAFC;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: #0B192C;
+    border-bottom: 1px solid #334155;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .title-box h1 {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .title-box .sub {
+    font-size: 9.5pt;
+    color: #94A3B8;
+    margin-top: 2px;
+  }
+  .badge {
+    background: var(--orange);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 8.5pt;
+    font-weight: 600;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn {
+    background: var(--card);
+    border: 1px solid #475569;
+    color: #F8FAFC;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 9.5pt;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+  .btn:hover {
+    background: #334155;
+    border-color: #64748B;
+  }
+  .btn.primary {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+  .btn.primary:hover {
+    background: #1958BD;
+  }
+  .viewer-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: auto;
+    position: relative;
+  }
+  .svg-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    max-width: 1200px;
+    width: 100%;
+    padding: 16px;
+    transition: transform 0.2s ease;
+  }
+  .svg-card svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  footer {
+    background: #0B192C;
+    border-top: 1px solid #334155;
+    padding: 10px 24px;
+    font-size: 8.5pt;
+    color: #94A3B8;
+    display: flex;
+    justify-content: space-between;
+  }
+  @media print {
+    header, footer, .actions { display: none !important; }
+    body { background: #fff !important; }
+    .viewer-container { padding: 0 !important; }
+    .svg-card { box-shadow: none !important; padding: 0 !important; max-width: 100% !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-box">
+    <h1>
+      <span>🏗️ แผนผังสถาปัตยกรรมระบบจริง (As-Built Complete Architecture)</span>
+      <span class="badge">Group 2 · DNS69</span>
+    </h1>
+    <div class="sub">VPC (10.0.0.0/16) · 6 Subnets · Dual ALBs · Golden AMIs · RDS PostgreSQL 16 · Asia Pacific (Singapore)</div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="zoomIn()">➕ ขยาย (Zoom In)</button>
+    <button class="btn" onclick="zoomOut()">➖ ย่อ (Zoom Out)</button>
+    <button class="btn" onclick="resetZoom()">↺ รีเซ็ต (100%)</button>
+    <button class="btn primary" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+    <a href="architecture-diagram.svg" download="architecture-diagram-group2.svg" class="btn">💾 ดาวน์โหลด SVG</a>
+  </div>
+</header>
+
+<main class="viewer-container">
+  <div class="svg-card" id="diagramWrapper">
+    <!-- Embed SVG Directly -->
+    <object data="architecture-diagram.svg" type="image/svg+xml" style="width:100%; height:auto;" id="svgObject">
+      <img src="architecture-diagram.svg" alt="Architecture Diagram">
+    </object>
+  </div>
+</main>
+
+<footer>
+  <div>Cloud Security Implementation · Group 2 (ระบบทายผลฟุตบอลกีฬาสีระหว่างคณะ DNS69)</div>
+  <div>AWS Management Console · Asia Pacific (Singapore) ap-southeast-1</div>
+</footer>
+
+<script>
+  let currentZoom = 1;
+  const wrapper = document.getElementById('diagramWrapper');
+
+  function zoomIn() {
+    currentZoom = Math.min(2.5, currentZoom + 0.15);
+    wrapper.style.transform = `scale(${currentZoom})`;
+  }
+  function zoomOut() {
+    currentZoom = Math.max(0.6, currentZoom - 0.15);
+    wrapper.style.transform = `scale(${currentZoom})`;
+  }
+  function resetZoom() {
+    currentZoom = 1;
+    wrapper.style.transform = 'scale(1)';
+  }
+</script>
+
+</body>
+</html>

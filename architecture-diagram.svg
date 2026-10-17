@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" width="100%" height="100%" style="background:#ffffff; font-family:'IBM Plex Sans Thai', 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap');
+      text { font-family: 'IBM Plex Sans Thai', 'Segoe UI', -apple-system, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', Consolas, monospace; }
+    </style>
+    <marker id="m-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#1F6FEB"/></marker>
+    <marker id="m-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#F28C28"/></marker>
+    <marker id="m-navy" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#0B2A5B"/></marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- ==================== INTERNET LAYER ==================== -->
+  <rect x="360" y="6" width="280" height="32" rx="16" fill="#0B2A5B" filter="url(#shadow)"/>
+  <text x="500" y="26" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="700">🌐 Internet / Public Users (HTTPS 443 / HTTP 80)</text>
+
+  <!-- ==================== AWS REGION BOUNDARY ==================== -->
+  <rect x="10" y="46" width="980" height="626" rx="12" fill="#F8FAFC" stroke="#94A3B8" stroke-dasharray="6 4" stroke-width="1.5"/>
+  <text x="24" y="66" font-size="11" fill="#475569" font-weight="700">☁️ AWS Region: Asia Pacific (Singapore) ap-southeast-1</text>
+
+  <!-- ==================== VPC CONTAINER ==================== -->
+  <rect x="24" y="80" width="760" height="578" rx="10" fill="#FFFFFF" stroke="#1F6FEB" stroke-width="2" filter="url(#shadow)"/>
+  <text x="40" y="103" font-size="13" fill="#1F6FEB" font-weight="700">VPC: Cloud_Project-vpc (vpc-0fe98aa3d3216992b)</text>
+  <text x="350" y="103" font-size="10" fill="#64748B" class="mono">IPv4 CIDR: 10.0.0.0/16 · DNS Resolution: Enabled</text>
+
+  <!-- Internet Gateway (IGW) -->
+  <rect x="415" y="66" width="170" height="32" rx="6" fill="#F28C28" filter="url(#shadow)"/>
+  <text x="500" y="81" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="700">Cloud_Project-igw</text>
+  <text x="500" y="93" text-anchor="middle" fill="#FFFFFF" font-size="8" class="mono">igw-000308548799b06f8</text>
+  <line x1="500" y1="38" x2="500" y2="66" stroke="#1F6FEB" stroke-width="2" marker-end="url(#m-blue)"/>
+
+  <!-- ==================== AVAILABILITY ZONES ==================== -->
+  <!-- AZ 1a -->
+  <rect x="36" y="124" width="364" height="522" rx="8" fill="none" stroke="#CBD5E1" stroke-dasharray="4 4" stroke-width="1.2"/>
+  <rect x="44" y="116" width="180" height="18" rx="4" fill="#E2E8F0"/>
+  <text x="52" y="129" font-size="10" fill="#334155" font-weight="700">📍 Availability Zone: ap-southeast-1a</text>
+
+  <!-- AZ 1b -->
+  <rect x="410" y="124" width="364" height="522" rx="8" fill="none" stroke="#CBD5E1" stroke-dasharray="4 4" stroke-width="1.2"/>
+  <rect x="418" y="116" width="180" height="18" rx="4" fill="#E2E8F0"/>
+  <text x="426" y="129" font-size="10" fill="#334155" font-weight="700">📍 Availability Zone: ap-southeast-1b</text>
+
+  <!-- ==================== PUBLIC ALB BANNER (web-lb) ==================== -->
+  <rect x="180" y="148" width="450" height="36" rx="6" fill="#FFF4E8" stroke="#F28C28" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="405" y="165" text-anchor="middle" font-size="10.5" fill="#B45309" font-weight="700">⚖️ Public Load Balancer: web-lb (Internet-facing Scheme)</text>
+  <text x="405" y="178" text-anchor="middle" font-size="8" fill="#475569" class="mono">web-lb-1062329544.ap-southeast-1.elb.amazonaws.com · SG: Sg-alb-public (80/443)</text>
+  <line x1="500" y1="98" x2="500" y2="148" stroke="#1F6FEB" stroke-width="1.8" marker-end="url(#m-blue)"/>
+
+  <!-- ==================== TIER 1: WEB TIER (PUBLIC) ==================== -->
+  <!-- Web Tier AZ 1a -->
+  <rect x="44" y="192" width="348" height="128" rx="7" fill="#FFF4E8" stroke="#F28C28"/>
+  <text x="56" y="208" font-size="10" fill="#B45309" font-weight="700">Web_Tier_1 (Public-1a)</text>
+  <text x="210" y="208" font-size="8.5" fill="#64748B" class="mono">10.0.1.0/24 · subnet-009f2f0c</text>
+  
+  <!-- NAT Gateway Box -->
+  <rect x="54" y="218" width="156" height="92" rx="5" fill="#FFFFFF" stroke="#F28C28"/>
+  <text x="132" y="235" text-anchor="middle" font-size="9.5" fill="#0B2A5B" font-weight="700">NAT: Cloud_NAT</text>
+  <text x="132" y="249" text-anchor="middle" font-size="7.5" fill="#64748B" class="mono">nat-06be85b30d172335d</text>
+  <text x="132" y="263" text-anchor="middle" font-size="8" fill="#B45309" font-weight="600" class="mono">EIP: 52.74.197.153</text>
+  <text x="132" y="277" text-anchor="middle" font-size="7.5" fill="#64748B" class="mono">Pri IP: 10.0.1.245</text>
+  <text x="132" y="291" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">● Zonal · Available</text>
+
+  <!-- Web EC2-1 -->
+  <rect x="220" y="218" width="164" height="92" rx="5" fill="#FFFFFF" stroke="#F28C28"/>
+  <text x="302" y="235" text-anchor="middle" font-size="9.5" fill="#B45309" font-weight="700">Web EC2 Server 1</text>
+  <text x="302" y="249" text-anchor="middle" font-size="8" fill="#475569">Next.js 15 Standalone (:3000)</text>
+  <text x="302" y="263" text-anchor="middle" font-size="7.5" fill="#64748B" class="mono">Golden AMI: web-v1</text>
+  <text x="302" y="277" text-anchor="middle" font-size="8" fill="#0B2A5B" font-weight="600">SG: Sg-web (Port 80)</text>
+  <text x="302" y="291" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">SSM Managed · Zero SSH</text>
+
+  <!-- Web Tier AZ 1b -->
+  <rect x="418" y="192" width="348" height="128" rx="7" fill="#FFF4E8" stroke="#F28C28"/>
+  <text x="430" y="208" font-size="10" fill="#B45309" font-weight="700">Web_Tier_2 (Public-1b)</text>
+  <text x="590" y="208" font-size="8.5" fill="#64748B" class="mono">10.0.2.0/24 · subnet-01eed2b3</text>
+  
+  <!-- Web EC2-2 -->
+  <rect x="430" y="218" width="324" height="92" rx="5" fill="#FFFFFF" stroke="#F28C28"/>
+  <text x="592" y="236" text-anchor="middle" font-size="10" fill="#B45309" font-weight="700">Web EC2 Server 2 (Auto Scaling Ready)</text>
+  <text x="592" y="252" text-anchor="middle" font-size="8.5" fill="#475569">Golden Image: web-v1 (ami-0ccbb043324803789) · Nginx Reverse Proxy</text>
+  <text x="592" y="268" text-anchor="middle" font-size="8.5" fill="#0B2A5B" font-weight="600">Security Group: Sg-web (Inbound HTTP 80 จาก Sg-alb-public เท่านั้น)</text>
+  <text x="592" y="284" text-anchor="middle" font-size="8" fill="#16A34A">Route Table: Public (0.0.0.0/0 → Cloud_Project-igw)</text>
+
+  <!-- Connect web-lb to Web Servers -->
+  <path d="M300,184 L302,216" stroke="#1F6FEB" stroke-width="1.8" marker-end="url(#m-blue)"/>
+  <path d="M510,184 L592,216" stroke="#1F6FEB" stroke-width="1.8" marker-end="url(#m-blue)"/>
+
+  <!-- ==================== INTERNAL ALB BANNER (app-lb) ==================== -->
+  <rect x="180" y="328" width="450" height="34" rx="6" fill="#EAF2FF" stroke="#1F6FEB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="405" y="344" text-anchor="middle" font-size="10.5" fill="#1F6FEB" font-weight="700">⚖️ Internal Load Balancer: app-lb (Private Internal Scheme)</text>
+  <text x="405" y="356" text-anchor="middle" font-size="8" fill="#475569" class="mono">internal-app-lb-561391200... · SG: Sg-alb-internal (Port 4000 จาก Sg-web)</text>
+
+  <!-- Connect Web Servers to app-lb -->
+  <path d="M302,310 L340,328" stroke="#F28C28" stroke-width="1.6" marker-end="url(#m-orange)"/>
+  <path d="M592,310 L470,328" stroke="#F28C28" stroke-width="1.6" marker-end="url(#m-orange)"/>
+
+  <!-- ==================== TIER 2: APP TIER (PRIVATE) ==================== -->
+  <!-- App Tier AZ 1a -->
+  <rect x="44" y="370" width="348" height="126" rx="7" fill="#EAF2FF" stroke="#1F6FEB"/>
+  <text x="56" y="386" font-size="10" fill="#1F6FEB" font-weight="700">App_Tier_1 (Private-1a)</text>
+  <text x="210" y="386" font-size="8.5" fill="#64748B" class="mono">10.0.11.0/24 · subnet-0b9ae95f</text>
+  
+  <!-- App EC2-1 -->
+  <rect x="56" y="396" width="324" height="90" rx="5" fill="#FFFFFF" stroke="#1F6FEB"/>
+  <text x="218" y="415" text-anchor="middle" font-size="10" fill="#1F6FEB" font-weight="700">Node.js App Server 1 (DNS69 API Engine)</text>
+  <text x="218" y="430" text-anchor="middle" font-size="8.5" fill="#475569">Golden Image: app-v1 (ami-0dc68469ddc403945) · Port 4000</text>
+  <text x="218" y="445" text-anchor="middle" font-size="8.5" fill="#0B2A5B" font-weight="600">SG: Sg-app · Egress ทางเดียวผ่าน Cloud_NAT (0.0.0.0/0)</text>
+  <text x="218" y="460" text-anchor="middle" font-size="8" fill="#16A34A">SSM Session Manager Active · Secrets Manager: dns69/app</text>
+
+  <!-- App Tier AZ 1b -->
+  <rect x="418" y="370" width="348" height="126" rx="7" fill="#EAF2FF" stroke="#1F6FEB"/>
+  <text x="430" y="386" font-size="10" fill="#1F6FEB" font-weight="700">App_Tier_2 (Private-1b)</text>
+  <text x="590" y="386" font-size="8.5" fill="#64748B" class="mono">10.0.12.0/24 · subnet-053038c3</text>
+  
+  <!-- App EC2-2 -->
+  <rect x="430" y="396" width="324" height="90" rx="5" fill="#FFFFFF" stroke="#1F6FEB"/>
+  <text x="592" y="415" text-anchor="middle" font-size="10" fill="#1F6FEB" font-weight="700">Node.js App Server 2 (Auto Scaling Tier 2)</text>
+  <text x="592" y="430" text-anchor="middle" font-size="8.5" fill="#475569">Golden Image: app-v1 · Express TypeScript Engine (Port 4000)</text>
+  <text x="592" y="445" text-anchor="middle" font-size="8.5" fill="#0B2A5B" font-weight="600">Route Table: Private2-app-b · เข้าถึง S3 ผ่าน Cloud_Project-vpce-s3</text>
+  <text x="592" y="460" text-anchor="middle" font-size="8" fill="#16A34A">Zero Public SSH · CloudWatch Agent ส่ง Logs แบบ Real-time</text>
+
+  <!-- Connect app-lb to App Servers -->
+  <path d="M300,362 L218,394" stroke="#1F6FEB" stroke-width="1.8" marker-end="url(#m-blue)"/>
+  <path d="M510,362 L592,394" stroke="#1F6FEB" stroke-width="1.8" marker-end="url(#m-blue)"/>
+
+  <!-- ==================== TIER 3: DATABASE TIER (AIR-GAPPED) ==================== -->
+  <!-- DB Tier AZ 1a -->
+  <rect x="44" y="504" width="348" height="138" rx="7" fill="#EEF1F8" stroke="#0B2A5B"/>
+  <text x="56" y="520" font-size="10" fill="#0B2A5B" font-weight="700">DB_1 (Private-1a · Isolated)</text>
+  <text x="210" y="520" font-size="8.5" fill="#64748B" class="mono">10.0.21.0/24 · subnet-0aaee3ea</text>
+  
+  <!-- RDS Primary -->
+  <rect x="56" y="530" width="324" height="102" rx="5" fill="#FFFFFF" stroke="#0B2A5B"/>
+  <text x="218" y="548" text-anchor="middle" font-size="10" fill="#0B2A5B" font-weight="700">🐘 Amazon RDS PostgreSQL 16 (Primary)</text>
+  <text x="218" y="563" text-anchor="middle" font-size="8.5" fill="#475569">apex-predict-db · Database: <b>dns69</b> · Role: <b>dns69_app</b></text>
+  <text x="218" y="578" text-anchor="middle" font-size="8.5" fill="#0B2A5B" font-weight="600">Security Group: Sg-rds (Port 5432 จาก Sg-app เท่านั้น)</text>
+  <text x="218" y="593" text-anchor="middle" font-size="8" fill="#16A34A">Public Access = No · KMS Encrypted (AES-256) · Air-Gapped</text>
+  <text x="218" y="607" text-anchor="middle" font-size="7.5" fill="#B45309" font-weight="600">Single-AZ Deployment (Free Tier Optimised Cost)</text>
+  <text x="218" y="621" text-anchor="middle" font-size="7.5" fill="#64748B">Least Privilege: ไม่มีสิทธิ์ DROP TABLE · Append-only audit_logs</text>
+
+  <!-- DB Tier AZ 1b -->
+  <rect x="418" y="504" width="348" height="138" rx="7" fill="#EEF1F8" stroke="#0B2A5B"/>
+  <text x="430" y="520" font-size="10" fill="#0B2A5B" font-weight="700">DB_2 (Private-1b · Standby Subnet)</text>
+  <text x="590" y="520" font-size="8.5" fill="#64748B" class="mono">10.0.22.0/24 · subnet-09b3df4a</text>
+  
+  <!-- RDS Standby Subnet Box -->
+  <rect x="430" y="530" width="324" height="102" rx="5" fill="#FFFFFF" stroke="#0B2A5B"/>
+  <text x="592" y="550" text-anchor="middle" font-size="10" fill="#0B2A5B" font-weight="700">DB Subnet Group Member (Standby)</text>
+  <text x="592" y="566" text-anchor="middle" font-size="8.5" fill="#475569">dns69-db-subnet-group ครอบคลุม AZ 1a &amp; 1b</text>
+  <text x="592" y="582" text-anchor="middle" font-size="8.5" fill="#0B2A5B" font-weight="600">Route Table: Private4-DB-b (ไม่มีเส้นทาง 0.0.0.0/0)</text>
+  <text x="592" y="598" text-anchor="middle" font-size="8" fill="#64748B">เข้าถึง S3 ผ่าน Gateway Endpoint สำหรับ Automated Backup</text>
+  <text x="592" y="614" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">Isolated Subnet ตัดขาดจากโลกภายนอก 100%</text>
+
+  <!-- Connect App Tier to DB Tier -->
+  <path d="M218,486 L218,528" stroke="#0B2A5B" stroke-width="2" marker-end="url(#m-navy)"/>
+  <text x="226" y="512" font-size="8.5" fill="#0B2A5B" font-weight="700">TCP 5432 (Sg-app → Sg-rds)</text>
+
+  <!-- ==================== SHARED AWS SERVICES PANEL ==================== -->
+  <rect x="796" y="80" width="188" height="578" rx="10" fill="#F0F4F8" stroke="#64748B" stroke-dasharray="4 4" stroke-width="1.5"/>
+  <text x="890" y="103" text-anchor="middle" font-size="11" fill="#0B2A5B" font-weight="700">Shared AWS Services</text>
+
+  <!-- S3 -->
+  <rect x="808" y="118" width="164" height="84" rx="6" fill="#FFFFFF" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="890" y="138" text-anchor="middle" font-size="10" fill="#1F6FEB" font-weight="700">🪣 Amazon S3</text>
+  <text x="890" y="154" text-anchor="middle" font-size="8" fill="#334155" font-weight="600" class="mono">release-group2-dns69</text>
+  <text x="890" y="168" text-anchor="middle" font-size="7.5" fill="#64748B">CloudTrail Log Buckets (3)</text>
+  <text x="890" y="182" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">VPC Gateway Endpoint (Free)</text>
+
+  <!-- Secrets Manager -->
+  <rect x="808" y="210" width="164" height="84" rx="6" fill="#FFFFFF" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="890" y="230" text-anchor="middle" font-size="10" fill="#F28C28" font-weight="700">🔐 AWS Secrets Manager</text>
+  <text x="890" y="246" text-anchor="middle" font-size="8" fill="#334155" font-weight="600" class="mono">dns69/app</text>
+  <text x="890" y="260" text-anchor="middle" font-size="7.5" fill="#64748B">DB_PASSWORD, JWT_SECRET</text>
+  <text x="890" y="274" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">Zero Hardcoded Keys</text>
+
+  <!-- SSM Session Manager -->
+  <rect x="808" y="302" width="164" height="84" rx="6" fill="#FFFFFF" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="890" y="322" text-anchor="middle" font-size="10" fill="#16A34A" font-weight="700">🖥️ Systems Manager</text>
+  <text x="890" y="338" text-anchor="middle" font-size="8" fill="#334155" font-weight="600">SSM Session Manager</text>
+  <text x="890" y="352" text-anchor="middle" font-size="7.5" fill="#0B2A5B" font-weight="600">Zero Port 22 SSH</text>
+  <text x="890" y="366" text-anchor="middle" font-size="7.5" fill="#64748B">Full Audit Logs to CloudTrail</text>
+
+  <!-- CloudWatch -->
+  <rect x="808" y="394" width="164" height="84" rx="6" fill="#FFFFFF" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="890" y="414" text-anchor="middle" font-size="10" fill="#0B2A5B" font-weight="700">📊 Amazon CloudWatch</text>
+  <text x="890" y="430" text-anchor="middle" font-size="7.8" fill="#334155" class="mono">app-unhealthy (/healthz)</text>
+  <text x="890" y="444" text-anchor="middle" font-size="7.8" fill="#334155" class="mono">web-4xx (Brute-force detect)</text>
+  <text x="890" y="458" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">Real-time Dashboard (OK)</text>
+
+  <!-- CloudTrail -->
+  <rect x="808" y="486" width="164" height="84" rx="6" fill="#FFFFFF" stroke="#CBD5E1" filter="url(#shadow)"/>
+  <text x="890" y="506" text-anchor="middle" font-size="10" fill="#7C3AED" font-weight="700">📜 AWS CloudTrail</text>
+  <text x="890" y="522" text-anchor="middle" font-size="8" fill="#334155" font-weight="600">Trail: Logging Active</text>
+  <text x="890" y="536" text-anchor="middle" font-size="7.5" fill="#64748B">24/7 API Call Logging to S3</text>
+  <text x="890" y="550" text-anchor="middle" font-size="7.5" fill="#16A34A" font-weight="600">Immutable Audit Trail</text>
+
+  <!-- Legend -->
+  <rect x="808" y="578" width="164" height="70" rx="6" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="890" y="594" text-anchor="middle" font-size="8.5" fill="#0B2A5B" font-weight="700">Security Flow Legend</text>
+  <line x1="820" y1="608" x2="850" y2="608" stroke="#1F6FEB" stroke-width="2" marker-end="url(#m-blue)"/>
+  <text x="858" y="611" font-size="7.5" fill="#475569">Public/Web Traffic</text>
+  <line x1="820" y1="622" x2="850" y2="622" stroke="#F28C28" stroke-width="2" marker-end="url(#m-orange)"/>
+  <text x="858" y="625" font-size="7.5" fill="#475569">Internal API Traffic</text>
+  <line x1="820" y1="636" x2="850" y2="636" stroke="#0B2A5B" stroke-width="2" marker-end="url(#m-navy)"/>
+  <text x="858" y="639" font-size="7.5" fill="#475569">Database Queries (5432)</text>
+</svg>
